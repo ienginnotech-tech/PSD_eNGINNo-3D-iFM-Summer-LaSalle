@@ -3473,19 +3473,22 @@ const WPW={list:[],root:null,run:false,box:null,blocks:[]};
 function wpPerson(col){const p=new THREE.Group(),lm=new THREE.MeshStandardMaterial({color:F3C('#334155'),roughness:.7});
   const legs=[-1,1].map(s=>{const l=new THREE.Mesh(new THREE.BoxGeometry(.09,.42,.1),lm);l.geometry.translate(0,-.21,0);l.position.set(s*.07,.44,0);p.add(l);return l});
   const body=new THREE.Mesh(new THREE.CylinderGeometry(.13,.15,.46,10),new THREE.MeshStandardMaterial({color:F3C(col),roughness:.6}));body.position.y=.68;p.add(body);
+  const am=new THREE.MeshStandardMaterial({color:F3C(col),roughness:.6}),hm=new THREE.MeshStandardMaterial({color:F3C('#F1C8A0')});
+  const arms=[-1,1].map(s=>{const g2=new THREE.Group();g2.position.set(s*.175,.88,0);const up=new THREE.Mesh(new THREE.CylinderGeometry(.045,.04,.38,8),am);up.position.y=-.19;g2.add(up);
+    const hand=new THREE.Mesh(new THREE.SphereGeometry(.045,8,6),hm);hand.position.y=-.4;g2.add(hand);g2.rotation.z=s*.08;p.add(g2);return g2});
   const head=new THREE.Mesh(new THREE.SphereGeometry(.12,12,10),new THREE.MeshStandardMaterial({color:F3C('#F1C8A0')}));head.position.y=1.03;p.add(head);
   const hair=new THREE.Mesh(new THREE.SphereGeometry(.125,12,8,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:F3C('#1F2937')}));hair.position.y=1.05;p.add(hair);
-  p.userData.legs=legs;return p}
+  p.userData.legs=legs;p.userData.arms=arms;return p}
 /* walkers: wander on the plaza, avoid buildings, legs swing */
 function wpPeople(g,pts,rnd,box,blocks){const C=['#3B82F6','#F97316','#EC4899','#8B5CF6','#22C55E','#EAB308','#0EA5E9'];WPW.list=[];WPW.root=g;WPW.box=box;WPW.blocks=blocks||[];
   pts.forEach((q,i)=>{const p=wpPerson(C[i%C.length]);p.position.set(q[0],.27,q[1]);g.add(p);WPW.list.push({p,tx:q[0],tz:q[1],v:.9+rnd()*.7,ph:rnd()*6,wait:rnd()*2})});
   if(!WPW.run){WPW.run=true;let last=performance.now();const tick=t=>{requestAnimationFrame(tick);const dt=Math.min(.05,(t-last)/1000);last=t;const R=WPW.root;if(!R||!R.parent||!WPW.list.length)return;
-    WPW.list.forEach(w=>{const p=w.p;if(w.wait>0){w.wait-=dt;p.userData.legs.forEach(l=>l.rotation.x*=.85);return}
+    WPW.list.forEach(w=>{const p=w.p;if(w.wait>0){w.wait-=dt;p.userData.legs.forEach(l=>l.rotation.x*=.85);p.userData.arms.forEach(l=>l.rotation.x*=.85);return}
       let dx=w.tx-p.position.x,dz=w.tz-p.position.z,d=Math.hypot(dx,dz);
       if(d<.15){const B=WPW.box;for(let k=0;k<12;k++){const nx=B[0]+Math.random()*(B[1]-B[0]),nz=B[2]+Math.random()*(B[3]-B[2]);if(!wpInBlk(nx,nz)&&!wpCross(p.position.x,p.position.z,nx,nz)){w.tx=nx;w.tz=nz;break}}w.wait=Math.random()<.25?1+Math.random()*2.5:0;return}
       const s=Math.min(d,w.v*dt);const nx=p.position.x+dx/d*s,nz=p.position.z+dz/d*s;if(wpInBlk(nx,nz)){w.tx=p.position.x;w.tz=p.position.z;return}
       p.position.x=nx;p.position.z=nz;const ry=Math.atan2(dx,dz);p.rotation.y+=((ry-p.rotation.y+Math.PI*3)%(Math.PI*2)-Math.PI)*.2;
-      w.ph+=dt*w.v*7;const a=Math.sin(w.ph)*.55;p.userData.legs[0].rotation.x=a;p.userData.legs[1].rotation.x=-a;p.position.y=.27+Math.abs(Math.sin(w.ph))*.03})};requestAnimationFrame(tick)}}
+      w.ph+=dt*w.v*7;const a=Math.sin(w.ph)*.55;p.userData.legs[0].rotation.x=a;p.userData.legs[1].rotation.x=-a;p.userData.arms[0].rotation.x=-a*.8;p.userData.arms[1].rotation.x=a*.8;p.position.y=.27+Math.abs(Math.sin(w.ph))*.03})};requestAnimationFrame(tick)}}
 function wpInBlk(x,z){return WPW.blocks.some(b=>Math.abs(x-b.x)<b.w/2+.35&&Math.abs(z-b.z)<b.d/2+.35)}
 function wpCross(x0,z0,x1,z1){for(let i=1;i<10;i++){const t=i/10;if(wpInBlk(x0+(x1-x0)*t,z0+(z1-z0)*t))return true}return false}
 const WP_STC={ok:'#22C55E',warn:'#F97316',crit:'#EF4444',off:'#94A3B8'};
