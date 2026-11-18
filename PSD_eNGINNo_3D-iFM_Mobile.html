@@ -629,6 +629,19 @@ body.wpf-on #main{margin-left:0!important}body.wpf-on #content{padding:0!importa
 .wpf .bcs-b3{height:calc(100dvh - 300px)!important;min-height:380px}
 .bcs-b3.wp-light,.wp-3d.wp-light{background:linear-gradient(180deg,#F8FAFC 0%,#E7ECF2 100%)!important;border-color:#D7DEE7!important}
 .bcs-b3.wp-light .bcs-b3-help,.wp-3d.wp-light .wp3d-help{color:#64748B}
+
+/* 3D background themes */
+.bcs-b3.wp-bg-dark,.wp-3d.wp-bg-dark,.bcs-f3.wp-bg-dark{background:radial-gradient(ellipse at 50% 30%,#1c2533 0%,#0d1117 78%)!important;border-color:#263041!important}
+.bcs-b3.wp-bg-white,.wp-3d.wp-bg-white,.bcs-f3.wp-bg-white{background:linear-gradient(180deg,#FFFFFF 0%,#EDF1F5 100%)!important;border-color:#D7DEE7!important}
+.bcs-b3.wp-bg-gray,.wp-3d.wp-bg-gray,.bcs-f3.wp-bg-gray{background:linear-gradient(180deg,#D3D9E0 0%,#AFB8C3 100%)!important;border-color:#9AA4B1!important}
+.wp-bg-white .bcs-help,.wp-bg-gray .bcs-help,.wp-bg-white .wp3d-help,.wp-bg-gray .wp3d-help,.wp-bg-white .bcs-b3-help,.wp-bg-gray .bcs-b3-help{color:#475569!important}
+.wp-bgsw{display:flex;flex-direction:column;gap:4px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(148,163,184,.4)}
+.wp-bgsw button{width:28px;height:28px;border-radius:7px;border:1.5px solid #475569;cursor:pointer;font-size:12px;font-weight:800;padding:0;line-height:1}
+.wp-bgsw .wpbg-auto{background:linear-gradient(135deg,#0d1117 0 50%,#F8FAFC 50% 100%);color:#F97316}
+.wp-bgsw .wpbg-dark{background:#0d1117;color:#94A3B8}.wp-bgsw .wpbg-white{background:#FFFFFF;color:#64748B}.wp-bgsw .wpbg-gray{background:#AEB6C1;color:#334155}
+.wp-bgsw button.on{border-color:#F97316;box-shadow:0 0 0 2px rgba(249,115,22,.45)}
+.wp-ctl{position:absolute;right:10px;top:10px;z-index:3;display:flex;flex-direction:column}
+.wp-ctl .wp-bgsw{margin-top:0;padding-top:0;border-top:0}
 </style>
 </head>
 <body>
@@ -3165,7 +3178,7 @@ function wpFacadeTex(kind){if(WPL.tex[kind])return WPL.tex[kind];const c=documen
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.encoding=THREE.sRGBEncoding;t.anisotropy=8;WPL.tex[kind]=t;return t}
 function wpBoxUV(w,h,d,tw,th){const geo=new THREE.BoxGeometry(w,h,d),uv=geo.attributes.uv,dims=[[d,h],[d,h],[w,d],[w,d],[w,h],[w,h]];
   for(let f=0;f<6;f++)for(let v=0;v<4;v++){const i=f*4+v;uv.setXY(i,uv.getX(i)*Math.max(1,Math.round(dims[f][0]/tw)),uv.getY(i)*(f===2||f===3?1:Math.max(1,Math.round(dims[f][1]/th))))}uv.needsUpdate=true;return geo}
-function wpLightMode(sc,on){if(!sc)return;sc.traverse(o=>{if(!o.isLight)return;if(o.userData.i0==null)o.userData.i0=o.intensity;o.intensity=on?o.userData.i0*(o.isHemisphereLight?.55:.8):o.userData.i0})}
+function wpLightMode(sc,on){if(!sc)return;const L=on?wpPal().li:[1,1];sc.traverse(o=>{if(!o.isLight)return;if(o.userData.i0==null)o.userData.i0=o.intensity;o.intensity=o.userData.i0*(o.isHemisphereLight?L[0]:L[1])})}
 function wpPill(txt,dot,sub,k){const c=document.createElement('canvas'),x=c.getContext('2d');x.font='bold 40px Arial';const tw=x.measureText(txt).width,sw=sub?(x.font='bold 30px Arial',x.measureText(sub).width+34):0;
   c.width=Math.ceil(tw+sw+100);c.height=96;x.fillStyle='#0F172A';x.strokeStyle=dot;x.lineWidth=6;const r=26,W=c.width-6,H=84;x.beginPath();x.moveTo(3+r,6);x.arcTo(3+W,6,3+W,6+H,r);x.arcTo(3+W,6+H,3,6+H,r);x.arcTo(3,6+H,3,6,r);x.arcTo(3,6,3+W,6,r);x.closePath();x.fill();x.stroke();
   x.fillStyle=dot;x.beginPath();x.arc(40,48,11,0,7);x.fill();x.fillStyle='#fff';x.font='bold 40px Arial';x.textBaseline='middle';x.fillText(txt,62,50);
@@ -3198,16 +3211,16 @@ function wpPeople(g,pts,rnd,box,blocks){const C=['#3B82F6','#F97316','#EC4899','
 function wpInBlk(x,z){return WPW.blocks.some(b=>Math.abs(x-b.x)<b.w/2+.35&&Math.abs(z-b.z)<b.d/2+.35)}
 function wpCross(x0,z0,x1,z1){for(let i=1;i<10;i++){const t=i/10;if(wpInBlk(x0+(x1-x0)*t,z0+(z1-z0)*t))return true}return false}
 const WP_STC={ok:'#22C55E',warn:'#F97316',crit:'#EF4444',off:'#94A3B8'};
-function wpCampusLight(fl,st){
+function wpCampusLight(fl,st){const P=wpPal();
   if(!window.THREE||!b3Init())return false;b3Dispose();
   const g=new THREE.Group();B3.group=g;WPC.g=g;const root=B3.el&&B3.el.closest('.bcs');if(root)root.classList.add('wp-campus');if(B3.el)B3.el.classList.add('wp-light');
   const blocks=D.bldg.blocks,byB={};fl.forEach(f=>{const b=f.blk||(SLS_L[f.id]||{}).blk;if(b)(byB[b]=byB[b]||[]).push(f)});const rnd=wpRnd('campus');
   const minX=Math.min(...blocks.map(b=>b.x-b.w/2)),maxX=Math.max(...blocks.map(b=>b.x+b.w/2)),minZ=Math.min(...blocks.map(b=>b.z-b.d/2)),maxZ=Math.max(...blocks.map(b=>b.z+b.d/2));
   const cx=(minX+maxX)/2,cz=(minZ+maxZ)/2,GW=maxX-minX+8,GD=maxZ-minZ+8;
-  const gnd=new THREE.Mesh(new THREE.PlaneGeometry(GW*4,GD*4),new THREE.MeshStandardMaterial({color:F3C('#E3E7EC'),roughness:1}));gnd.rotation.x=-Math.PI/2;gnd.position.set(cx,-.02,cz);g.add(gnd);
-  const grid=new THREE.GridHelper(Math.max(GW,GD)*4,Math.round(Math.max(GW,GD)*2),0xD3D9E1,0xE1E6EC);grid.position.set(cx,-.01,cz);g.add(grid);
-  const walk=new THREE.Mesh(new THREE.BoxGeometry(GW+5,.22,GD+5),new THREE.MeshStandardMaterial({color:F3C('#C5CAD3'),roughness:.9}));walk.position.set(cx,.11,cz);g.add(walk);
-  const plaza=new THREE.Mesh(new THREE.BoxGeometry(GW+1.2,.26,GD+1.2),new THREE.MeshStandardMaterial({color:F3C('#ABAFE0'),roughness:.95}));plaza.position.set(cx,.13,cz);g.add(plaza);
+  const gnd=new THREE.Mesh(new THREE.PlaneGeometry(GW*4,GD*4),new THREE.MeshStandardMaterial({color:F3C(P.gnd),roughness:1}));gnd.rotation.x=-Math.PI/2;gnd.position.set(cx,-.02,cz);g.add(gnd);
+  const grid=new THREE.GridHelper(Math.max(GW,GD)*4,Math.round(Math.max(GW,GD)*2),P.g1,P.g2);grid.position.set(cx,-.01,cz);g.add(grid);
+  const walk=new THREE.Mesh(new THREE.BoxGeometry(GW+5,.22,GD+5),new THREE.MeshStandardMaterial({color:F3C(P.walk),roughness:.9}));walk.position.set(cx,.11,cz);g.add(walk);
+  const plaza=new THREE.Mesh(new THREE.BoxGeometry(GW+1.2,.26,GD+1.2),new THREE.MeshStandardMaterial({color:F3C(P.plaza),roughness:.95}));plaza.position.set(cx,.13,cz);g.add(plaza);
   const base=.26,fac={office:wpFacadeTex('office'),car:wpFacadeTex('car')},capM=new THREE.MeshStandardMaterial({color:F3C('#F8FAFC'),roughness:.55}),ledgeM=new THREE.MeshStandardMaterial({color:F3C('#E5E7EB'),roughness:.6});
   const TINT={ok:'#F1F4F8',warn:'#FFC9A0',crit:'#FFA8A8'};let top=0;const fy={};
   blocks.forEach(b=>{const fs=(byB[b.id]||[]).slice().sort((a,c)=>wpLv(a.id)-wpLv(c.id)),car=b.type==='carpark',FH=car?.62:1.05,tex=car?fac.car:fac.office;let nb=0,nc=0;
@@ -3243,16 +3256,16 @@ function wpCampusLight(fl,st){
 {const _d=bldg3dRender;bldg3dRender=function(fl,st){const isWP=D&&D.bldg&&Array.isArray(D.bldg.blocks)&&D.bldg.blocks.length;if(B3.el)B3.el.classList.remove('wp-light');wpLightMode(B3.scene,false);
   if(isWP&&!(BCS.sel&&SLS_L[BCS.sel])&&!WPV.blk&&bcsBStyle()===1){const ok=wpCampusLight(fl,st);wpMiniHide();wpFlCard();return ok}return _d(fl,st)}}
 /* portfolio map (3D-iFM Workplace) in the same calm style */
-w3Build=function(){if(!w3Init())return;if(W3.group){W3.group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){[].concat(o.material).forEach(m=>{if(m.map&&!Object.values(WPL.tex).includes(m.map))m.map.dispose();m.dispose()})}});W3.scene.remove(W3.group)}
+w3Build=function(){const P=wpPal();if(!w3Init())return;if(W3.group){W3.group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){[].concat(o.material).forEach(m=>{if(m.map&&!Object.values(WPL.tex).includes(m.map))m.map.dispose();m.dispose()})}});W3.scene.remove(W3.group)}
   const g=new THREE.Group();W3.group=g;W3.pick=[];W3.anim=[];const L=wpReg().filter(wpVisible),rnd=wpRnd('port');if(W3.el)W3.el.classList.add('wp-light');
   if(!L.length){W3.scene.add(g);return}
   const Sx=.75,ext=b=>{if(b.code==='SLS'||b.type==='campus'){const K=wpBlocks();return[b.x+Math.min(...K.map(k=>k.x-k.w/2))*Sx,b.x+Math.max(...K.map(k=>k.x+k.w/2))*Sx,b.z+Math.min(...K.map(k=>k.z-k.d/2))*Sx,b.z+Math.max(...K.map(k=>k.z+k.d/2))*Sx]}const w=b.type==='carpark'?9:7.5;return[b.x-w/2,b.x+w/2,b.z-w/2,b.z+w/2]};
   const E=L.map(ext),X0=Math.min(...E.map(e=>e[0]))-5,X1=Math.max(...E.map(e=>e[1]))+5,Z0=Math.min(...E.map(e=>e[2]))-5,Z1=Math.max(...E.map(e=>e[3]))+5;
   W3.cx=(X0+X1)/2;W3.cz=(Z0+Z1)/2;const PW=X1-X0,PD=Z1-Z0,span=Math.max(PW,PD);
-  const gnd=new THREE.Mesh(new THREE.PlaneGeometry(span*5,span*5),new THREE.MeshStandardMaterial({color:F3C('#E3E7EC'),roughness:1}));gnd.rotation.x=-Math.PI/2;gnd.position.set(W3.cx,-.02,W3.cz);g.add(gnd);
-  const grid=new THREE.GridHelper(span*5,Math.round(span*2.5),0xD3D9E1,0xE1E6EC);grid.position.set(W3.cx,-.01,W3.cz);g.add(grid);
-  const walk=new THREE.Mesh(new THREE.BoxGeometry(PW+4,.22,PD+4),new THREE.MeshStandardMaterial({color:F3C('#C5CAD3')}));walk.position.set(W3.cx,.11,W3.cz);g.add(walk);
-  const pz=new THREE.Mesh(new THREE.BoxGeometry(PW,.26,PD),new THREE.MeshStandardMaterial({color:F3C('#ABAFE0')}));pz.position.set(W3.cx,.13,W3.cz);g.add(pz);
+  const gnd=new THREE.Mesh(new THREE.PlaneGeometry(span*5,span*5),new THREE.MeshStandardMaterial({color:F3C(P.gnd),roughness:1}));gnd.rotation.x=-Math.PI/2;gnd.position.set(W3.cx,-.02,W3.cz);g.add(gnd);
+  const grid=new THREE.GridHelper(span*5,Math.round(span*2.5),P.g1,P.g2);grid.position.set(W3.cx,-.01,W3.cz);g.add(grid);
+  const walk=new THREE.Mesh(new THREE.BoxGeometry(PW+4,.22,PD+4),new THREE.MeshStandardMaterial({color:F3C(P.walk)}));walk.position.set(W3.cx,.11,W3.cz);g.add(walk);
+  const pz=new THREE.Mesh(new THREE.BoxGeometry(PW,.26,PD),new THREE.MeshStandardMaterial({color:F3C(P.plaza)}));pz.position.set(W3.cx,.13,W3.cz);g.add(pz);
   const capM=new THREE.MeshStandardMaterial({color:F3C('#F8FAFC')}),base=.26;
   L.forEach(b=>{const sel=WPR.sel===b.code,pl=b.status!=='active',S=wpSiteStats(b.code),bad=S&&S.p1>0,dot=bad?WP_STC.crit:pl?WP_STC.off:WP_STC.ok;let H=0;
     const mk=(w,h,d,x,z,kind,floors)=>{const side=new THREE.MeshStandardMaterial({map:wpFacadeTex(kind),color:F3C(sel?'#FFE0C2':'#F1F4F8'),roughness:.5,emissive:F3C(sel?'#F97316':'#000000'),emissiveIntensity:sel?.08:0});
@@ -3269,6 +3282,30 @@ w3Build=function(){if(!w3Init())return;if(W3.group){W3.group.traverse(o=>{if(o.g
   const obs=[];L.forEach(b=>{const e=ext(b);obs.push({x:(e[0]+e[1])/2,z:(e[2]+e[3])/2,w:e[1]-e[0],d:e[3]-e[2]})});const PP=[];for(let i=0;i<80&&PP.length<18;i++){const x=X0+1+rnd()*(PW-2),z=Z0+1+rnd()*(PD-2);if(obs.some(o=>Math.abs(x-o.x)<o.w/2+.5&&Math.abs(z-o.z)<o.d/2+.5))continue;PP.push([x,z])}
   wpPeople(g,PP,rnd,[X0+.6,X1-.6,Z0+.6,Z1-.6],obs);
   W3.scene.add(g);wpLightMode(W3.scene,true);if(!W3.fitted){W3.rad=span*1.35;W3.ph=1.0;W3.th=.6;W3.fitted=1}};
+
+/* ───────── 3d. 3D background theme: Auto (follows back-office theme) · Dark · White · Gray ───────── */
+const WPBG_L={auto:['A',_t('อัตโนมัติ — ตามธีมหลังบ้าน','Auto — follow app theme')],dark:['●',_t('พื้นหลัง Dark','Dark')],white:['○',_t('พื้นหลัง White','White')],gray:['◑',_t('พื้นหลังเทา','Gray')]};
+function wpBgMode(){return LS.get('psd_ifm_3dbg','auto')}
+function wpBg(){const m=wpBgMode();if(m!=='auto')return m;
+  if(IS_MOB)return document.body.classList.contains('theme-dark')?'dark':'white';
+  const t=document.documentElement.getAttribute('data-theme')||'system';return t==='light'?'white':t==='dark'?'dark':'gray'}
+const WP_PAL={white:{gnd:'#E3E7EC',g1:0xD3D9E1,g2:0xE1E6EC,walk:'#C5CAD3',plaza:'#ABAFE0',li:[.55,.8]},gray:{gnd:'#AEB6C1',g1:0x9AA4B1,g2:0xA6AFBB,walk:'#959EAB',plaza:'#8E93C6',li:[.62,.85]},dark:{gnd:'#1A212B',g1:0x2B3646,g2:0x232C39,walk:'#2E3644',plaza:'#3B4073',li:[.85,.95]}};
+const wpPal=()=>WP_PAL[wpBg()]||WP_PAL.white;
+function wpBgApply(){const k=wpBg();document.querySelectorAll('.bcs-b3,.wp-3d,.bcs-f3').forEach(el=>{el.classList.remove('wp-bg-dark','wp-bg-white','wp-bg-gray');el.classList.add('wp-bg-'+k)});
+  document.querySelectorAll('.wp-bgsw button').forEach(b=>b.classList.toggle('on',b.dataset.m===wpBgMode()))}
+function wpBgCtl(host){if(!host||host.querySelector('.wp-bgsw'))return;const d=document.createElement('div');d.className='wp-bgsw';
+  d.innerHTML=Object.keys(WPBG_L).map(m=>`<button data-m="${m}" class="wpbg-${m} ${wpBgMode()===m?'on':''}" title="${esc(WPBG_L[m][1])}" onclick="wpBgSet('${m}')">${WPBG_L[m][0]}</button>`).join('');host.appendChild(d)}
+function wpBgSet(m){LS.set('psd_ifm_3dbg',m);toast('🎨 '+WPBG_L[m][1]);B3.n=null;wpBgApply();try{bcsRefresh()}catch(e){}if(W3.el&&W3.el.isConnected)w3Build()}
+function wpBgHook(){wpBgApply();document.querySelectorAll('.bcs-b3 .bcs-ctl,.bcs-f3 .bcs-ctl').forEach(wpBgCtl);
+  const w=document.getElementById('wp3d');if(w&&!w.querySelector('.wp-ctl')){const c=document.createElement('div');c.className='bcs-ctl wp-ctl';w.appendChild(c);wpBgCtl(c)}}
+{const _w=w3Build;w3Build=function(){_w();wpBgHook()}}
+/* exploded block view: grid floor under the stack on light backgrounds */
+{const _bk=wpBlock3D;wpBlock3D=function(b,fl,st){const ok=_bk(b,fl,st);try{if(ok&&B3.group&&wpBg()!=='dark'){const P=wpPal(),car=b.type==='carpark',sz=(car?17:12.5)*4;
+  const gr=new THREE.GridHelper(sz,Math.round(sz),P.g1,P.g2);gr.position.y=-.9;B3.group.add(gr)}}catch(e){}return ok}}
+{const _d=bldg3dRender;bldg3dRender=function(fl,st){const ok=_d(fl,st);setTimeout(wpBgHook,0);return ok}}
+{const _f=fp3dBuild;fp3dBuild=function(a,b2,c,d){const ok=_f(a,b2,c,d);setTimeout(wpBgHook,0);return ok}}
+if(!IS_MOB&&typeof setTheme==='function'){const _st=setTheme;setTheme=function(m){_st(m);if(wpBgMode()==='auto'){B3.n=null;wpBgApply();try{bcsRefresh()}catch(e){}}}}
+if(IS_MOB&&typeof applyPrefs==='function'){const _ap=applyPrefs;applyPrefs=function(){_ap();setTimeout(()=>{if(wpBgMode()==='auto')wpBgApply()},0)}}
 
 /* ───────── 5. E-mail OTP login (@bhirajburi.co.th) + request access ───────── */
 const WP_POS=[['tech_eng','ช่างซ่อมบำรุง (M&E)','M&E technician','eng'],['tech_fac','ช่างอาคาร / Facility','Facility technician','fac'],['hk','แม่บ้าน / ทำความสะอาด','Housekeeper','hk'],
