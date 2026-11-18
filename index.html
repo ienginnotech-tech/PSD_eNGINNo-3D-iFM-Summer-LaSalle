@@ -718,6 +718,9 @@ body.wpf-on #main{margin-left:0!important}body.wpf-on #content{padding:0!importa
 .wpf .bcs-tools{display:none!important}
 .wp-mini{width:180px}.wp-mini-c{height:130px}.wp-mini-h small{display:none}
 .wpf .wp-mini{width:230px}.wpf .wp-mini-c{height:200px}.wpf .wp-mini-h small{display:inline}
+.wpf .bcs-bwrap{flex:1 1 100%!important;min-width:0;max-width:none!important;width:100%!important}
+.wpf .bcs-layout{flex-wrap:nowrap}
+.wpf .bcs-b3{height:calc(100dvh - 300px)!important;min-height:380px}
 </style>
 </head>
 <body>
@@ -3166,7 +3169,7 @@ function wpPlanTex(url,cb){if(WPV.tex[url]){if(WPV.tex[url].t)cb(WPV.tex[url].t)
   img.onerror=()=>{WPV.tex[url].q=[]};img.src=url}
 function wpBlock3D(b,fl,st){
   if(!window.THREE||!b3Init())return false;b3Dispose();
-  IOT.spr3={};const g=new THREE.Group();B3.group=g;WPC.g=g;WPC.tx=0;WPC.tz=0;WPC.gx=0;WPC.gz=0;
+  {const root=B3.el&&B3.el.closest('.bcs');if(root)root.classList.add('wp-campus')}IOT.spr3={};const g=new THREE.Group();B3.group=g;WPC.g=g;WPC.tx=0;WPC.tz=0;WPC.gx=0;WPC.gz=0;
   const car=b.type==='carpark',FW=car?17:12.5,GAP=car?3.7:5.4;
   const fs=fl.filter(f=>(f.blk||(SLS_L[f.id]||{}).blk)===b.id).sort((a,c)=>wpLv(a.id)-wpLv(c.id));
   const areasBy={};(D.areas||[]).forEach(a=>{const f=bcsAreaFloor(a);(areasBy[f]=areasBy[f]||[]).push(a)});
