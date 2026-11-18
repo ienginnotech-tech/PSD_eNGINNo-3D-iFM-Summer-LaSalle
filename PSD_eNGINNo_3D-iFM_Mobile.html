@@ -608,6 +608,22 @@ body.wpf-on #main{margin-left:0!important}body.wpf-on #content{padding:0!importa
 .wp-demo{margin-left:auto;background:#FEF3C7;color:#92400E;border-radius:5px;padding:0 5px;font-weight:700;font-size:10px}
 .wp-allchip{font-weight:700}.wp-chipsep{align-self:center;font-weight:800;color:#F97316;padding:0 4px;white-space:nowrap}
 @media(max-width:640px){.wp-mini{width:160px}.wp-mini-c{height:120px}.wp-mini-h small{display:none}}
+
+/* front page: 3D always full width; floor detail panel only in back office */
+.wpf .bcs-panel,.wpf .bcs-hint{display:none!important}
+.wpf .bcs.wp-campus .bcs-bwrap{flex:1 1 100%!important}
+.wpf .bcs.wp-campus .bcs-b3{height:calc(100dvh - 300px)}
+.wp-flcard{position:absolute;right:58px;bottom:34px;width:340px;max-width:calc(100% - 80px);z-index:4;background:rgba(15,23,42,.94);color:#E2E8F0;border:1px solid #334155;border-radius:14px;padding:10px 12px;font-size:12.5px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.wp-flc-h{display:flex;align-items:center;gap:8px}.wp-flc-h b{flex:1;font-size:14px;color:#FDBA74}.wp-flc-h button{background:none;border:0;color:#94A3B8;cursor:pointer;font-size:15px}
+.wp-flc-st{color:#fff;font-size:11px;font-weight:700;border-radius:99px;padding:2px 8px}
+.wp-flc-r{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin:8px 0}.wp-flc-r small{margin-left:auto;color:#94A3B8}
+.wp-ring{border:1.5px solid #22C55E;color:#86EFAC;border-radius:99px;padding:1px 8px;font-size:11px;font-weight:700}.wp-ring.bad{border-color:#F97316;color:#FDBA74;background:rgba(249,115,22,.15)}
+.wp-flc-l{max-height:150px;overflow:auto;display:flex;flex-direction:column;gap:4px}.wp-flc-l small{color:#94A3B8}
+.wp-flc-b{display:flex;gap:6px;margin-top:9px}.wp-flc-b button{flex:1;border:1px solid #475569;background:#1E293B;color:#E2E8F0;border-radius:8px;padding:7px;font-size:12px;cursor:pointer;font-family:inherit}
+.wp-flc-b .wp-pri{background:#F97316;border-color:#F97316;color:#fff;font-weight:700}
+.wpf .bcs-tools{display:none!important}
+.wp-mini{width:180px}.wp-mini-c{height:130px}.wp-mini-h small{display:none}
+.wpf .wp-mini{width:230px}.wpf .wp-mini-c{height:200px}.wpf .wp-mini-h small{display:inline}
 </style>
 </head>
 <body>
@@ -2915,7 +2931,7 @@ function wpBlock3D(b,fl,st){
   if(B3.n!==key){B3.n=key;B3.rad=fit;B3.th=.72;B3.ph=1.13;B3.tcy=H/2;B3.cy=H/2}
   if(BCS.sel){const i=fs.findIndex(f=>f.id===BCS.sel);if(i>=0&&B3.lastSel!==BCS.sel){B3.tcy=i*GAP;B3.rad=Math.min(B3.rad,Math.max(14,fit*.62))}}else if(B3.lastSel){B3.tcy=H/2;B3.rad=fit}
   B3.lastSel=BCS.sel;
-  wpMiniMount(b.id);return true}
+  wpMiniMount(b.id);wpFlCard();return true}
 /* mini building / campus (top-left overlay, like the reference) */
 function wpMiniMount(id){const host=B3.el;if(!host)return;let m=host.querySelector('.wp-mini');
   if(!m){m=document.createElement('div');m.className='wp-mini';host.appendChild(m)}
@@ -2942,7 +2958,7 @@ function wpMiniMount(id){const host=B3.el;if(!host)return;let m=host.querySelect
 function wpMiniHide(){const m=B3.el&&B3.el.querySelector('.wp-mini');if(m)m.remove()}
 /* dispatch: campus ⇄ block */
 bldg3dRender=function(fl,st){if(D&&D.bldg&&Array.isArray(D.bldg.blocks)&&D.bldg.blocks.length){if(BCS.sel&&SLS_L[BCS.sel])WPV.blk=SLS_L[BCS.sel].blk;
-  const b=WPV.blk&&D.bldg.blocks.find(x=>x.id===WPV.blk);if(b)return wpBlock3D(b,fl,st);const ok=wpCampus3D(fl,st);wpMiniHide();return ok}return _wpB3r0(fl,st)};
+  const b=WPV.blk&&D.bldg.blocks.find(x=>x.id===WPV.blk);if(b)return wpBlock3D(b,fl,st);const ok=wpCampus3D(fl,st);wpMiniHide();wpFlCard();return ok}return _wpB3r0(fl,st)};
 const _wpSel0=bcsSelect;bcsSelect=function(id){id=String(id||'');if(id.indexOf('blk:')===0){wpBlkSet(id.slice(4));return}return _wpSel0(id)};
 const _wpTip0=bcsTip;bcsTip=function(e,id){if(String(id||'').indexOf('blk:')===0){const k=String(id).slice(4),S=wpBlkStatus(k),b=(D.bldg.blocks||[]).find(x=>x.id===k),t=document.getElementById('bcs-tip');if(!t)return;
   t.innerHTML=`<b>🏢 ${esc(k)}</b> · ${b&&b.type==='carpark'?_t('อาคารจอดรถ','Car park'):_t('อาคารสำนักงาน','Office')}<br>${S.n} ${_t('ชั้น','floors')} · <span style="color:#F97316">${S.bad} ${_t('เตือน','warn')}</span> · <span style="color:#EF4444">${S.crit} ${_t('วิกฤต','crit')}</span><br><small>${_t('คลิก = เปิดอาคาร / ดูทุกชั้น','click = open building')}</small>`;t.hidden=false;bcsTipMove(e);return}return _wpTip0(e,id)};
@@ -2952,6 +2968,17 @@ const _wpChips0=bcsChips;bcsChips=function(){if(!(D&&D.bldg&&Array.isArray(D.bld
   el.innerHTML=`<button class="bcs-chip wp-allchip ${!WPV.blk?'on':''}" onclick="wpBlkSet(null)">🏙 ${_t('ทั้งแคมปัส','Whole campus')}</button>${bk}${fls?`<span class="wp-chipsep">${esc(WPV.blk)} ›</span>${fls}`:''}`;
   const on=el.querySelector('.wp-flchip.on')||el.querySelector('.bcs-chip.on');if(on&&on.scrollIntoView)try{on.scrollIntoView({block:'nearest',inline:'center'})}catch(e){}};
 {const _rs=b3Reset;b3Reset=function(){if(WPV.blk&&B3.fit){B3.rad=B3.fit;B3.tcy=(B3.top||0)/2;B3.th=.72;B3.ph=1.13;B3.lastSel=null;return}_rs()}}
+
+/* front page: floor summary card floating on the 3D (the detailed floor plan lives in the back office) */
+function wpFlCard(){const host=B3.el;if(!host)return;let c=host.querySelector('.wp-flcard');const fid=BCS.sel;
+  if(IS_MOB||CUR!=='front'||!fid||!bcsFloorById(fid)){if(c)c.remove();return}
+  if(!c){c=document.createElement('div');c.className='wp-flcard';host.appendChild(c)}
+  const f=bcsFloorById(fid),o=(BCS.st||{})[fid]||{n:0,items:[]},LB={r1:'WR',r2:'HARD',r3:'PPM',r4:'SOFT'},bad=o.items.filter(x=>x.rs.bad);
+  const ring=k=>`<span class="wp-ring ${o[k]?'bad':''}">${LB[k]} ${o[k]?o[k]:'OK'}</span>`;
+  c.innerHTML=`<div class="wp-flc-h"><b>${esc(f.name)}</b><span class="wp-flc-st" style="background:${bcsColor(o)}">${o.crit?_t('วิกฤต','Critical'):o.bad?_t('เตือน','Warning'):_t('ปกติ','Normal')}</span><button onclick="bcsHidePanel()" title="${_t('ปิด','Close')}">✕</button></div>
+  <div class="wp-flc-r">${['r1','r2','r3','r4'].map(ring).join('')}<small>${o.n} ${_t('พื้นที่','areas')}</small></div>
+  <div class="wp-flc-l">${bad.length?bad.slice(0,6).map(x=>`<div><b style="color:${x.rs.crit?'#EF4444':'#F97316'}">●</b> ${esc(x.a.name)} <small>${['r1','r2','r3','r4'].filter(k=>x.rs[k].bad).map(k=>LB[k]+(x.rs[k].n?' · '+esc(String(x.rs[k].n).slice(0,40)):'')).join(' / ')}</small></div>`).join('')+(bad.length>6?`<small>+${bad.length-6} ${_t('พื้นที่','more')}</small>`:''):`<div>✅ ${_t('ทุกพื้นที่ในชั้นนี้ปกติ','All areas normal')}</div>`}</div>
+  <div class="wp-flc-b"><button class="wp-pri" onclick="showView('bcs')">🗂 ${_t('ผังละเอียด (หลังบ้าน)','Detailed plan (back office)')}</button>${cap('e')||cap('wr')?`<button onclick="quickWR()">＋ ${_t('แจ้งงาน','New WR')}</button>`:''}</div>`}
 
 /* ───────── 1b. Workplace building registry (SLS · BTB · BTE · CLS · UBC-II + Add Building) ───────── */
 const WP_REG0=[{code:'SLS',business:'workplace',name:'Summer LaSalle',type:'campus',floors:3,basements:0,status:'active',color:'#E69A3C',x:0,z:0,services:'*',address:'Sukhumvit 105 (LaSalle), Bang Na, Bangkok',campus:'A1-A6 · B1-B6 · C1 C5 C6 · P1 P2'},
