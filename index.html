@@ -3903,7 +3903,12 @@ function wpfTop(){const u=me(),cur=gasSite()||LS.get('psd_ifm_site_workplace','S
 if(!IS_MOB){VIEWS.front=()=>{Q.push(()=>{BCS.mount();iotRefreshUI();const s=document.getElementById('sync-pill'),w=document.getElementById('wpf-sync');if(s&&w&&!s.hidden){w.textContent=s.textContent;w.className='wpf-sync '+s.className.replace('sync-pill','')}});
   return`<div class="wpf">${wpfTop()}<div class="wpf-body"><section class="wpf-main">${BCS.html('desk')}</section><aside class="wpf-side">${wpfSide()}</aside></div></div>`};
 TITLES.front='3D-iFM';
-{const nav0=NAV[0][2];if(!nav0.some(x=>x[0]==='front'))nav0.unshift(['front','🌐','หน้า 3D-iFM (หน้าหลัก)','Campus 3D · Real-time'])}
+{/* V2.10: front ซ้ำกับปุ่ม 🌐 3D บน topbar → ไม่ใส่ใน NAV; ย้าย site + ifm3d ไป Management เหนือ Manpower */
+ const nav0=NAV[0][2],mg=(NAV.find(x=>x[0]==='Management')||NAV[NAV.length-1])[2];
+ const take=k=>{const i=nav0.findIndex(x=>x[0]===k);return i>=0?nav0.splice(i,1)[0]:null};
+ const fr=nav0.findIndex(x=>x[0]==='front');if(fr>=0)nav0.splice(fr,1);
+ const mv=['site','ifm3d'].map(take).filter(Boolean).filter(it=>!mg.some(x=>x[0]===it[0]));
+ const mi=Math.max(0,mg.findIndex(x=>x[0]==='manpower'));mg.splice(mi,0,...mv)}
 {const _r=render;render=function(){document.body.classList.toggle('wpf-on',CUR==='front');_r()}}
 }
 setInterval(()=>{const c=document.getElementById('wpf-clock');if(c)c.textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})},20000);
