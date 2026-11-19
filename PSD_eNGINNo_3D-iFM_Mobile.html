@@ -649,6 +649,18 @@ body.wpf-on #main{margin-left:0!important}body.wpf-on #content{padding:0!importa
 .wp-bvis input{width:16px;height:16px;accent-color:#F97316}
 .wp-bedit{position:absolute;right:8px;top:8px;border:1px solid var(--border);background:transparent;border-radius:7px;cursor:pointer;padding:2px 7px;color:inherit}
 .wp-badd{border-style:dashed!important;align-items:center;justify-content:center;text-align:center;opacity:.85}
+
+.wpf-sec1{flex:1 1 42%;min-height:0;display:flex;flex-direction:column;border-bottom:1px solid var(--border)}
+.wpf-sec2{flex:1 1 58%;min-height:0;display:flex;flex-direction:column}
+.wpf-sh{display:flex;align-items:baseline;gap:8px;padding:10px 12px 4px;font-weight:800;font-size:13px}.wpf-sh small{font-weight:500;opacity:.6;font-size:11px;margin-left:auto}
+.wpf-slist{flex:1;overflow:auto;padding:2px 8px 8px}
+.wpf-sg{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;letter-spacing:1.5px;opacity:.75;margin:8px 4px 5px}.wpf-sg .dot{width:7px;height:7px;border-radius:2px}
+.wpf-svc{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid var(--border);border-left:3px solid var(--sc);border-radius:10px;padding:5px 9px;margin-bottom:5px;background:var(--bg);color:inherit;cursor:pointer;font-family:inherit}
+.wpf-svc:hover{border-color:var(--sc);transform:translateX(2px)}
+.wpf-sic{font-size:16px;width:27px;height:27px;display:grid;place-items:center;border-radius:8px;background:color-mix(in srgb,var(--sc) 18%,transparent);flex:none}
+.wpf-sn{flex:1;min-width:0;display:flex;flex-direction:column}.wpf-sn b{font-size:13px}.wpf-sn small{font-size:11px;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wpf-sw{background:#EF4444;color:#fff;font-size:10.5px;font-weight:800;border-radius:99px;padding:1px 7px}
+.wpf-ss{font-weight:800;font-size:13px;min-width:38px;text-align:right}.wpf-sgo{opacity:.5;font-size:16px}
 </style>
 </head>
 <body>
@@ -3666,20 +3678,26 @@ setTimeout(()=>{if(me&&me())iotStart()},900);
 Object.keys(BIZ).forEach(k=>{if(k!=='workplace')delete BIZ[k]});BIZK='workplace';LS.set('psd_ifm_biz','workplace');
 
 /* ───────── 9. 3D front page (full screen) ⇄ back office ───────── */
-const WPF={side:LS.get('psd_ifm_wpf_side','wr')};
+const WPF={side:LS.get('psd_ifm_wpf_side2','al')};
 function wpfTicketFloor(t){const a=(D.areas||[]).find(x=>x.name===t.area);return a?bcsAreaFloor(a):null}
 function wpfGoTicket(id){const t=D.tickets.find(x=>x.id===id);if(!t)return;const f=wpfTicketFloor(t);if(f)bcsSelect(f);else openForm('tickets',id)}
 function wpfSide(){const PR={P1:'#EF4444',P2:'#F97316',P3:'#EAB308',P4:'#64748B'},ST={New:'#3B82F6','In Progress':'#F97316','On Hold':'#64748B',Assigned:'#8B5CF6'};
   const open=D.tickets.filter(t=>svcOn(t.service)&&t.status!=='Closed'&&t.status!=='Completed').sort((a,b)=>String(a.priority).localeCompare(String(b.priority))||String(b.date).localeCompare(String(a.date)));
   const A=(typeof alerts==='function'?alerts():[]).slice(0,8),io=iotDevs();
-  const tab=(k,l,n)=>`<button class="${WPF.side===k?'on':''}" onclick="WPF.side='${k}';LS.set('psd_ifm_wpf_side','${k}');render()">${l}${n!=null?` <i>${n}</i>`:''}</button>`;
+  const tab=(k,l,n)=>`<button class="${WPF.side===k?'on':''}" onclick="WPF.side='${k}';LS.set('psd_ifm_wpf_side2','${k}');render()">${l}${n!=null?` <i>${n}</i>`:''}</button>`;
   let body='';
   if(WPF.side==='wr')body=open.length?open.slice(0,40).map(t=>{const f=wpfTicketFloor(t),sv=SVC[t.service]||{ic:'🛠'};return`<div class="wpf-row" onclick="wpfGoTicket('${esc(t.id)}')"><div class="wpf-r1"><code>${esc(t.id)}</code><span class="wpf-ic">${sv.ic}</span><b>${esc(t.category||'')}${t.desc?' · '+esc(String(t.desc).slice(0,60)):''}</b><span class="wpf-pr" style="background:${PR[t.priority]||'#64748B'}">${esc(t.priority||'')}</span></div>
     <div class="wpf-r2">${esc(t.area||'—')}${f?' · '+esc((bcsFloorById(f)||{name:f}).name):''}${t.assignee?' · 👤 '+esc(t.assignee):''}<span class="wpf-st" style="color:${ST[t.status]||'#94A3B8'}">● ${esc(t.status||'')}</span></div></div>`}).join(''):`<div class="wpf-empty">✅ ${_t('ไม่มีงานค้าง','No open work requests')}</div>`;
   else if(WPF.side==='iot')body=io.length?io.map(d=>{const e=iotEval(d),T=IOT_T[d.type]||{ic:'📡'};return`<div class="wpf-row" onclick="iotOpen('${esc(d.id)}')"><div class="wpf-r1"><span class="wpf-ic">${T.ic}</span><b>${esc(d.name)}</b><span class="wpf-pr" data-iots="${esc(d.id)}" style="background:${IOT_LV[e.lv][0]}">${IOT_LV[e.lv][1]}</span></div><div class="wpf-r2">${esc(d.area||'')}<span class="wpf-val" data-iotm="${esc(d.id)}">${esc(iotMainTxt(d))}</span></div></div>`}).join(''):`<div class="wpf-empty">📡 ${_t('ยังไม่มีอุปกรณ์ IoT','No IoT devices')}</div>`;
   else body=A.length?A.map(a=>`<div class="wpf-row" onclick="showView('${esc(a.v||'dashboard')}')"><div class="wpf-r1"><span class="wpf-dot" style="background:${a.lv==='red'?'#EF4444':a.lv==='yellow'?'#F59E0B':'#3B82F6'}"></span><b>${esc(a.m)}</b></div>${a.s?`<div class="wpf-r2">${esc(a.s)}</div>`:''}</div>`).join(''):`<div class="wpf-empty">✅ ${_t('ไม่มีการแจ้งเตือน','No alerts')}</div>`;
-  return`<div class="wpf-stabs">${tab('wr','🛠 Work Request',open.length)}${tab('iot','📡 IoT',io.length)}${tab('al','🔔 '+_t('แจ้งเตือน','Alerts'),A.length)}</div><div class="wpf-list">${body}</div>
+  return`<div class="wpf-sec1"><div class="wpf-stabs">${tab('al','🔔 '+_t('แจ้งเตือน','Alerts'),A.length)}${tab('wr','🛠 Work Request',open.length)}${tab('iot','📡 IoT',io.length)}</div><div class="wpf-list">${body}</div></div>
+  <div class="wpf-sec2">${wpfSvc()}</div>
   ${cap('e')||cap('wr')?`<button class="wpf-new" onclick="quickWR()">＋ ${_t('แจ้งงาน','New work request')}</button>`:''}`}
+/* Hard & Soft services — คลิก = ไปหน้าบริการนั้นในหลังบ้าน */
+function wpfSvc(){const on=SVC_ON();if(!on.length)return'';
+  const grp=g=>{const L=on.filter(k=>SVC[k].type===g);if(!L.length)return'';return`<div class="wpf-sg"><span class="dot" style="background:var(--${g.toLowerCase()})"></span>${g.toUpperCase()} SERVICE</div>`+L.map(k=>{const S=SVC[k];let sc=null;try{sc=SCORE[k]()}catch(e){}const ow=openWR(k);
+    return`<button class="wpf-svc" style="--sc:${S.c}" onclick="showView('${k}')" title="${_t('เปิดหน้า ','Open ')}${esc(S.n)}${_t(' ในหลังบ้าน',' in back office')}"><span class="wpf-sic">${S.ic}</span><span class="wpf-sn"><b>${esc(S.n)}</b><small>${esc(S.th)}</small></span>${ow?`<span class="wpf-sw" title="Open WR">${ow}</span>`:''}${sc!=null?`<span class="wpf-ss" style="color:${scoreColor(sc)}">${sc}%</span>`:''}<span class="wpf-sgo">›</span></button>`}).join('')};
+  return`<div class="wpf-sh">🧰 ${_t('บริการ Hard & Soft','Hard & Soft services')}<small>${_t('คลิกเพื่อเข้าหลังบ้าน','click to open')}</small></div><div class="wpf-slist">${grp('Hard')}${grp('Soft')}</div>`}
 function wpfTop(){const u=me(),cur=gasSite()||LS.get('psd_ifm_site_workplace','SLS'),L=wpReg().filter(wpVisible),live=typeof DMODE==='function'&&DMODE()!=='sample';
   return`<header class="wpf-top"><div class="wpf-brand" onclick="showView('front')"><span class="wpf-logo">3D-iFM</span><div><small>PSD eNGINNo · Workplace</small><b>${esc(D.site||'Summer LaSalle (SLS)')}</b></div></div>
   <div class="wpf-bld">${L.map(b=>`<button class="${b.code===cur?'on':''}" onclick="wpOpenSite('${esc(b.code)}','front')" title="${esc(b.name)}">🏢 ${esc(b.code)}${b.status!=='active'?'<small>'+_t('แผน','plan')+'</small>':''}</button>`).join('')}</div>
