@@ -680,6 +680,18 @@ body.wpf-on #main{margin-left:0!important}body.wpf-on #content{padding:0!importa
 .wpd-r2{font-size:11.5px;opacity:.72;margin-top:3px}
 .wpd-cr{background:#EF4444;color:#fff;font-size:10px;font-weight:800;border-radius:6px;padding:1px 6px;white-space:nowrap}
 .wpd-hint{font-size:11px;opacity:.55;text-align:center;margin:6px 0}
+
+.wpf-main.wpf-modon{padding:0 14px 16px}
+.wpf-modbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:10px 0;background:var(--bg);border-bottom:2px solid var(--sc);margin-bottom:12px}
+.wpf-modx{border:0;background:#F97316;color:#fff;font-weight:800;border-radius:9px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:13px;white-space:nowrap}
+.wpf-modt{display:flex;align-items:center;gap:7px;font-size:17px;white-space:nowrap}.wpf-modt small{font-size:10.5px;font-weight:800;letter-spacing:1px;opacity:.6;text-transform:uppercase}
+.wpf-modtabs{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+.wpf-modtabs button{display:flex;align-items:center;gap:5px;border:1px solid var(--border);background:var(--card,var(--bg));color:inherit;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.wpf-modtabs button.on{background:var(--sc);border-color:var(--sc);color:#fff}
+@media(max-width:1500px){.wpf-modtabs button span{display:none}}
+.wpf-modgo{border:1px solid var(--border);background:transparent;color:inherit;border-radius:9px;padding:6px 10px;cursor:pointer;font-size:14px}
+.wpf-modbody>.page-h:first-child,.wpf-modbody>.ph:first-child{margin-top:0}
+.wpf-svc.on{border-color:var(--sc);background:color-mix(in srgb,var(--sc) 16%,var(--bg));box-shadow:inset 0 0 0 1px var(--sc)}
 </style>
 </head>
 <body>
@@ -3727,15 +3739,15 @@ function wpfSide(){const PR={P1:'#EF4444',P2:'#F97316',P3:'#EAB308',P4:'#64748B'
   if(WPF.side==='wr')body=open.length?open.slice(0,40).map(t=>{const f=wpfTicketFloor(t),sv=SVC[t.service]||{ic:'🛠'};return`<div class="wpf-row" onclick="wpfGoTicket('${esc(t.id)}')"><div class="wpf-r1"><code>${esc(t.id)}</code><span class="wpf-ic">${sv.ic}</span><b>${esc(t.category||'')}${t.desc?' · '+esc(String(t.desc).slice(0,60)):''}</b><span class="wpf-pr" style="background:${PR[t.priority]||'#64748B'}">${esc(t.priority||'')}</span></div>
     <div class="wpf-r2">${esc(t.area||'—')}${f?' · '+esc((bcsFloorById(f)||{name:f}).name):''}${t.assignee?' · 👤 '+esc(t.assignee):''}<span class="wpf-st" style="color:${ST[t.status]||'#94A3B8'}">● ${esc(t.status||'')}</span></div></div>`}).join(''):`<div class="wpf-empty">✅ ${_t('ไม่มีงานค้าง','No open work requests')}</div>`;
   else if(WPF.side==='iot')body=io.length?io.map(d=>{const e=iotEval(d),T=IOT_T[d.type]||{ic:'📡'};return`<div class="wpf-row" onclick="iotOpen('${esc(d.id)}')"><div class="wpf-r1"><span class="wpf-ic">${T.ic}</span><b>${esc(d.name)}</b><span class="wpf-pr" data-iots="${esc(d.id)}" style="background:${IOT_LV[e.lv][0]}">${IOT_LV[e.lv][1]}</span></div><div class="wpf-r2">${esc(d.area||'')}<span class="wpf-val" data-iotm="${esc(d.id)}">${esc(iotMainTxt(d))}</span></div></div>`}).join(''):`<div class="wpf-empty">📡 ${_t('ยังไม่มีอุปกรณ์ IoT','No IoT devices')}</div>`;
-  else body=A.length?A.map(a=>`<div class="wpf-row" onclick="showView('${esc(a.v||'dashboard')}')"><div class="wpf-r1"><span class="wpf-dot" style="background:${a.lv==='red'?'#EF4444':a.lv==='yellow'?'#F59E0B':'#3B82F6'}"></span><b>${esc(a.m)}</b></div>${a.s?`<div class="wpf-r2">${esc(a.s)}</div>`:''}</div>`).join(''):`<div class="wpf-empty">✅ ${_t('ไม่มีการแจ้งเตือน','No alerts')}</div>`;
+  else body=A.length?A.map(a=>`<div class="wpf-row" onclick="${SVC[a.v]?`wpfModOpen('${esc(a.v)}')`:`showView('${esc(a.v||'dashboard')}')`}"><div class="wpf-r1"><span class="wpf-dot" style="background:${a.lv==='red'?'#EF4444':a.lv==='yellow'?'#F59E0B':'#3B82F6'}"></span><b>${esc(a.m)}</b></div>${a.s?`<div class="wpf-r2">${esc(a.s)}</div>`:''}</div>`).join(''):`<div class="wpf-empty">✅ ${_t('ไม่มีการแจ้งเตือน','No alerts')}</div>`;
   return`<div class="wpf-sec1"><div class="wpf-stabs">${tab('al','🔔 '+_t('แจ้งเตือน','Alerts'),A.length)}${tab('wr','🛠 Work Request',open.length)}${tab('iot','📡 IoT',io.length)}</div><div class="wpf-list">${body}</div></div>
   <div class="wpf-sec2">${WPF.det&&typeof wpfDet==='function'&&bcsFloorById(WPF.det.fid)?wpfDet():wpfSvc()}</div>
   ${cap('e')||cap('wr')?`<button class="wpf-new" onclick="quickWR()">＋ ${_t('แจ้งงาน','New work request')}</button>`:''}`}
 /* Hard & Soft services — คลิก = ไปหน้าบริการนั้นในหลังบ้าน */
 function wpfSvc(){const on=SVC_ON();if(!on.length)return'';
   const grp=g=>{const L=on.filter(k=>SVC[k].type===g);if(!L.length)return'';return`<div class="wpf-sg"><span class="dot" style="background:var(--${g.toLowerCase()})"></span>${g.toUpperCase()} SERVICE</div>`+L.map(k=>{const S=SVC[k];let sc=null;try{sc=SCORE[k]()}catch(e){}const ow=openWR(k);
-    return`<button class="wpf-svc" style="--sc:${S.c}" onclick="showView('${k}')" title="${_t('เปิดหน้า ','Open ')}${esc(S.n)}${_t(' ในหลังบ้าน',' in back office')}"><span class="wpf-sic">${S.ic}</span><span class="wpf-sn"><b>${esc(S.n)}</b><small>${esc(S.th)}</small></span>${ow?`<span class="wpf-sw" title="Open WR">${ow}</span>`:''}${sc!=null?`<span class="wpf-ss" style="color:${scoreColor(sc)}">${sc}%</span>`:''}<span class="wpf-sgo">›</span></button>`}).join('')};
-  return`<div class="wpf-sh">🧰 ${_t('บริการ Hard & Soft','Hard & Soft services')}<small>${_t('คลิกเพื่อเข้าหลังบ้าน','click to open')}</small></div><div class="wpf-slist">${grp('Hard')}${grp('Soft')}</div>`}
+    return`<button class="wpf-svc ${WPF.mod===k?'on':''}" style="--sc:${S.c}" onclick="wpfModOpen('${k}')" title="${_t('แสดงข้อมูล ','Show ')}${esc(S.n)}${_t(' บนหน้านี้',' here')}"><span class="wpf-sic">${S.ic}</span><span class="wpf-sn"><b>${esc(S.n)}</b><small>${esc(S.th)}</small></span>${ow?`<span class="wpf-sw" title="Open WR">${ow}</span>`:''}${sc!=null?`<span class="wpf-ss" style="color:${scoreColor(sc)}">${sc}%</span>`:''}<span class="wpf-sgo">›</span></button>`}).join('')};
+  return`<div class="wpf-sh">🧰 ${_t('บริการ Hard & Soft','Hard & Soft services')}<small>${_t('คลิกเพื่อดูข้อมูล','click to view')}</small></div><div class="wpf-slist">${grp('Hard')}${grp('Soft')}</div>`}
 function wpfTop(){const u=me(),cur=gasSite()||LS.get('psd_ifm_site_workplace','SLS'),L=wpReg().filter(wpVisible),live=typeof DMODE==='function'&&DMODE()!=='sample';
   return`<header class="wpf-top"><div class="wpf-brand" onclick="showView('front')"><span class="wpf-logo">3D-iFM</span><div><small>PSD eNGINNo · Workplace</small><b>${esc(D.site||'Summer LaSalle (SLS)')}</b></div></div>
   <div class="wpf-bld">${L.map(b=>`<button class="${b.code===cur?'on':''}" onclick="wpOpenSite('${esc(b.code)}','front')" title="${esc(b.name)}">🏢 ${esc(b.code)}${b.status!=='active'?'<small>'+_t('แผน','plan')+'</small>':''}</button>`).join('')}</div>
@@ -3744,7 +3756,7 @@ function wpfTop(){const u=me(),cur=gasSite()||LS.get('psd_ifm_site_workplace','S
     <button class="wpf-b" onclick="showView('iot')">📡 IoT</button><button class="wpf-b wpf-back" onclick="showView('dashboard')">🗂 ${_t('หลังบ้าน','Back office')}</button><a class="wpf-b" href="PSD_eNGINNo_3D-iFM_Mobile.html">📱 Mobile</a>
     <button class="wpf-b" onclick="cycleTheme()" title="Theme">◐</button>${u?`<span class="wpf-user" title="${esc(u.email||'')}">👤 ${esc(u.name||u.username)}<small>${esc(roleTx(u.role))}</small></span>`:''}</div></header>`}
 if(!IS_MOB){VIEWS.front=()=>{Q.push(()=>{BCS.mount();iotRefreshUI();const s=document.getElementById('sync-pill'),w=document.getElementById('wpf-sync');if(s&&w&&!s.hidden){w.textContent=s.textContent;w.className='wpf-sync '+s.className.replace('sync-pill','')}});
-  return`<div class="wpf">${wpfTop()}<div class="wpf-body"><section class="wpf-main">${BCS.html('desk')}</section><aside class="wpf-side">${wpfSide()}</aside></div></div>`};
+  return`<div class="wpf">${wpfTop()}<div class="wpf-body"><section class="wpf-main ${WPF.mod&&typeof wpfModOk==='function'&&wpfModOk()?'wpf-modon':''}">${WPF.mod&&typeof wpfModOk==='function'&&wpfModOk()?wpfMod():BCS.html('desk')}</section><aside class="wpf-side">${wpfSide()}</aside></div></div>`};
 TITLES.front='3D-iFM';
 {/* V2.10: front ซ้ำกับปุ่ม 🌐 3D บน topbar → ไม่ใส่ใน NAV; ย้าย site + ifm3d ไป Management เหนือ Manpower */
  const nav0=NAV[0][2],mg=(NAV.find(x=>x[0]==='Management')||NAV[NAV.length-1])[2];
@@ -3796,6 +3808,20 @@ if(typeof wpFlCard==='function'&&typeof WPF!=='undefined'){const _fc=wpFlCard;wp
   const o=(BCS.st||{})[fid]||{items:[]},bad=o.items.filter(x=>x.rs.bad);
   c.querySelectorAll('.wp-flc-l > div').forEach((d,i)=>{const x=bad[i];if(!x)return;d.style.cursor='pointer';d.classList.add('wpd-al');d.onclick=()=>wpDetOpen(fid,'',x.a.id)});
   if(WPF.det)wpDetPaint()}}
+
+/* ───────── 3D front: แสดงหน้า Module (ข้อมูลหลังบ้าน) ในพื้นที่หลัก ───────── */
+if(typeof WPF!=='undefined')WPF.mod=null;
+function wpfModOk(){const k=WPF.mod;return!!k&&!!VIEWS[k]&&k!=='front'&&viewOk(k)}
+function wpfModOpen(k){WPF.mod=WPF.mod===k?null:k;render();const m=document.querySelector('.wpf-main');if(m)m.scrollTop=0}
+function wpfModClose(){WPF.mod=null;render()}
+function wpfMod(){const k=WPF.mod,S=SVC[k]||{ic:'📄',n:TITLES[k]||k,c:'#F97316',type:''};let h='';try{h=VIEWS[k]()}catch(e){h=`<div class="au-err">❌ ${esc(e.message)}</div>`}
+  const on=SVC_ON();
+  return`<div class="wpf-modbar" style="--sc:${S.c}"><button class="wpf-modx" onclick="wpfModClose()">← 🏙 ${_t('กลับหน้า 3D','Back to 3D')}</button>
+   <div class="wpf-modt"><span>${S.ic}</span><b>${esc(S.n)}</b>${S.type?`<small>${S.type} Service</small>`:''}</div>
+   <div class="wpf-modtabs">${on.map(x=>`<button class="${x===k?'on':''}" style="--sc:${SVC[x].c}" onclick="wpfModOpen('${x}')" title="${esc(SVC[x].n)}">${SVC[x].ic}<span>${esc(SVC[x].n)}</span></button>`).join('')}</div>
+   <button class="wpf-modgo" onclick="showView('${k}')" title="${_t('เปิดเต็มจอในหลังบ้าน','Open in back office')}">🗂</button></div>
+   <div class="wpf-modbody">${h}</div>`}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&typeof WPF!=='undefined'&&WPF.mod&&CUR==='front'&&!document.querySelector('.modal-bg.show,.modal.open,.bcs-modal:not([hidden])')){wpfModClose()}});
 
 applyPrefs();authBoot();ST.user=stUser();load();render();if(ST.user)setTimeout(()=>syncBoot(()=>{if(!FM)render()}),50);
 </script>
