@@ -642,6 +642,13 @@ body.wpf-on #main{margin-left:0!important}body.wpf-on #content{padding:0!importa
 .wp-bgsw button.on{border-color:#F97316;box-shadow:0 0 0 2px rgba(249,115,22,.45)}
 .wp-ctl{position:absolute;right:10px;top:10px;z-index:3;display:flex;flex-direction:column}
 .wp-ctl .wp-bgsw{margin-top:0;padding-top:0;border-top:0}
+
+.wp-bgrid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))!important}
+.wp-bcard{position:relative;cursor:pointer;text-align:left}.wp-bcard.off{opacity:.55;filter:grayscale(.6)}
+.wp-bvis{display:flex;gap:6px;align-items:center;font-size:12.5px;font-weight:700;margin-top:6px;padding:5px 8px;border-radius:8px;background:rgba(249,115,22,.1);color:#EA580C;width:max-content;cursor:pointer}
+.wp-bvis input{width:16px;height:16px;accent-color:#F97316}
+.wp-bedit{position:absolute;right:8px;top:8px;border:1px solid var(--border);background:transparent;border-radius:7px;cursor:pointer;padding:2px 7px;color:inherit}
+.wp-badd{border-style:dashed!important;align-items:center;justify-content:center;text-align:center;opacity:.85}
 </style>
 </head>
 <body>
@@ -2951,7 +2958,7 @@ function wpBlock3D(b,fl,st){
   const el=B3.el,asp=Math.max(.5,(el&&el.clientWidth||900)/(el&&el.clientHeight||560)),tv=Math.tan(17.5*Math.PI/180);
   let fit=Math.max((maxW*1.45+4)/2/(tv*asp),(H+maxW*.55+5)/2/tv)*(sty===3?1.18:1.08),key='blk'+b.id+'|'+sty+'|'+Math.round(asp*10);if(car&&asp>=1)fit*=.76;B3.rmax=Math.max(120,fit*2.2);B3.fit=fit;
   if(B3.n!==key){B3.n=key;B3.rad=fit;B3.th=.72;B3.ph=1.13;B3.tcy=H/2;B3.cy=H/2}
-  if(BCS.sel){const i=fs.findIndex(f=>f.id===BCS.sel);if(i>=0&&B3.lastSel!==BCS.sel){B3.tcy=i*GAP;B3.rad=Math.min(B3.rad,Math.max(14,fit*.62))}}else if(B3.lastSel){B3.tcy=H/2;B3.rad=fit}
+  if(BCS.sel){const i=fs.findIndex(f=>f.id===BCS.sel);if(i>=0&&B3.lastSel!==BCS.sel){B3.tcy=i*GAP+.4;B3.rad=Math.max(car?15:12,fit*.5);B3.ph=Math.min(B3.ph,.98)}}else if(B3.lastSel){B3.tcy=H/2;B3.rad=fit}
   B3.lastSel=BCS.sel;
   wpMiniMount(b.id);wpFlCard();return true}
 /* mini building / campus (top-left overlay, like the reference) */
@@ -3032,7 +3039,7 @@ function wpBlockSolid(b,fl,st,g){const car=b.type==='carpark',FW=car?17:12.5,FH=
 const WP_REG0=[{code:'SLS',business:'workplace',name:'Summer LaSalle',type:'campus',floors:3,basements:0,status:'active',color:'#E69A3C',x:0,z:0,services:'*',address:'Sukhumvit 105 (LaSalle), Bang Na, Bangkok',campus:'A1-A6 · B1-B6 · C1 C5 C6 · P1 P2'},
  {code:'BTB',business:'workplace',name:'Bhiraj Tower at BITEC',type:'tower',floors:26,basements:0,status:'planned',color:'#3B82F6',x:34,z:-6,services:'*',address:'',campus:''},
  {code:'BTE',business:'workplace',name:'Bhiraj Tower at EmQuartier',type:'tower',floors:40,basements:0,status:'planned',color:'#A855F7',x:46,z:6,services:'*',address:'',campus:''},
- {code:'CLS',business:'workplace',name:'CLS',type:'tower',floors:10,basements:0,status:'planned',color:'#14B8A6',x:34,z:16,services:'*',address:'',campus:''},
+ {code:'BCS',business:'workplace',name:'BCS',type:'office',floors:5,basements:0,status:'planned',color:'#14B8A6',x:-30,z:18,services:'*',address:'',campus:''},
  {code:'UBC-II',business:'workplace',name:'UBC II',type:'tower',floors:20,basements:0,status:'planned',color:'#EF4444',x:22,z:24,services:'*',address:'',campus:''}];
 const WPR={list:null,loading:false,sel:'SLS',ed:null};
 function wpReg(){if(WPR.list)return WPR.list;const c=LS.get('psd_ifm_wp_reg',null);return Array.isArray(c)&&c.length?c:WP_REG0}
@@ -3223,20 +3230,20 @@ function wpCampusLight(fl,st){const P=wpPal();
   const plaza=new THREE.Mesh(new THREE.BoxGeometry(GW+1.2,.26,GD+1.2),new THREE.MeshStandardMaterial({color:F3C(P.plaza),roughness:.95}));plaza.position.set(cx,.13,cz);g.add(plaza);
   const base=.26,fac={office:wpFacadeTex('office'),car:wpFacadeTex('car')},capM=new THREE.MeshStandardMaterial({color:F3C('#F8FAFC'),roughness:.55}),ledgeM=new THREE.MeshStandardMaterial({color:F3C('#E5E7EB'),roughness:.6});
   const TINT={ok:'#F1F4F8',warn:'#FFC9A0',crit:'#FFA8A8'};let top=0;const fy={};
-  blocks.forEach(b=>{const fs=(byB[b.id]||[]).slice().sort((a,c)=>wpLv(a.id)-wpLv(c.id)),car=b.type==='carpark',FH=car?.62:1.05,tex=car?fac.car:fac.office;let nb=0,nc=0;
+  blocks.forEach(b=>{const fs=(byB[b.id]||[]).slice().sort((a,c)=>wpLv(a.id)-wpLv(c.id)),car=b.type==='carpark',FH=car?.62:1.05,tex=car?fac.car:fac.office,G=wpGrpOf(b.id),dim=!!(WPV.grp&&G&&G.id!==WPV.grp),cM=dim?new THREE.MeshStandardMaterial({color:F3C('#F8FAFC'),transparent:true,opacity:.3,depthWrite:false}):capM;let nb=0,nc=0;
     fs.forEach((f,i)=>{const o=st[f.id]||{},lv=o.crit?'crit':o.bad?'warn':'ok';if(o.crit)nc++;else if(o.bad)nb++;
-      const side=new THREE.MeshStandardMaterial({map:tex,color:F3C(TINT[lv]),roughness:.55,metalness:.05,emissive:F3C(lv==='ok'?'#000000':lv==='crit'?'#EF4444':'#F97316'),emissiveIntensity:0}),mats=[side,side,capM,capM,side,side];
+      const side=new THREE.MeshStandardMaterial({map:tex,color:F3C(TINT[lv]),roughness:.55,metalness:.05,emissive:F3C(lv==='ok'?'#000000':lv==='crit'?'#EF4444':'#F97316'),emissiveIntensity:0,transparent:dim,opacity:dim?.3:1,depthWrite:!dim}),mats=[side,side,cM,cM,side,side];
       const y=base+i*FH;
       const m=new THREE.Mesh(wpBoxUV(b.w,FH,b.d,car?1.6:1.1,FH),mats);m.position.set(b.x,y+FH/2,b.z);m.userData.fid='blk:'+b.id;g.add(m);B3.pick.push(m);
       fy[f.id]={y:y+FH/2,b}});
     const H=base+fs.length*FH;top=Math.max(top,H);
-    const rf=new THREE.Mesh(new THREE.BoxGeometry(b.w*.97,.08,b.d*.97),capM);rf.position.set(b.x,H+.04,b.z);g.add(rf);
+    const rf=new THREE.Mesh(new THREE.BoxGeometry(b.w*.97,.08,b.d*.97),cM);rf.position.set(b.x,H+.04,b.z);g.add(rf);
     const ru=new THREE.Mesh(new THREE.BoxGeometry(b.w*.34,.32,b.d*.3),new THREE.MeshStandardMaterial({color:F3C('#CBD5E1'),roughness:.5}));ru.position.set(b.x+b.w*.12,H+.2,b.z-b.d*.1);g.add(ru);
     const sc=nc?WP_STC.crit:nb?WP_STC.warn:WP_STC.ok,dt=new THREE.Mesh(new THREE.SphereGeometry(.14,12,10),new THREE.MeshBasicMaterial({color:F3C(sc)}));dt.position.set(b.x,H+.45,b.z);g.add(dt);
-    const pl=wpPill(b.id,sc,(nb+nc)?'⚠'+(nb+nc):'',.034);pl.position.set(b.x,H+.95,b.z);g.add(pl)});
+    if(WPV.grp&&G&&G.id===WPV.grp&&G.blocks.length>1){const pl=wpPill(b.id,sc,(nb+nc)?'⚠'+(nb+nc):'',.034);pl.position.set(b.x,H+.95,b.z);g.add(pl)}});
   // campus group labels
-  [['A','SLS Campus A'],['B','SLS Campus B'],['C','SLS Campus C']].forEach(([c,n])=>{const bs=blocks.filter(b=>b.campus===c);if(!bs.length)return;const gx=bs.reduce((s,b)=>s+b.x,0)/bs.length,gz=Math.min(...bs.map(b=>b.z-b.d/2));
-    const any=bs.map(b=>wpBlkStatus(b.id));const col=any.some(s=>s.crit)?WP_STC.crit:any.some(s=>s.bad)?WP_STC.warn:WP_STC.ok;const p=wpPill(n,col,'',.042);p.position.set(gx,4.9,gz-.6);g.add(p)});
+  WP_GROUPS.forEach(G=>{const bs=blocks.filter(b=>G.blocks.includes(b.id));if(!bs.length)return;if(WPV.grp&&WPV.grp!==G.id)return;const S=wpGrpStatus(G.id),gx=bs.reduce((s,b)=>s+b.x,0)/bs.length,gz=Math.min(...bs.map(b=>b.z-b.d/2)),car=bs[0].type==='carpark';
+    const p=wpPill('SLS '+G.name,S.col,S.n?'⚠'+S.n:'',WPV.grp?.04:.042);p.position.set(gx,car?6.6:4.9,car?bs[0].z:gz-.6);g.add(p)});
   // trees around the sidewalk + people on the plaza (demo)
   const T=[],x0=cx-GW/2-1.6,x1=cx+GW/2+1.6,z0=cz-GD/2-1.6,z1=cz+GD/2+1.6;for(let x=x0;x<=x1;x+=4.2){T.push([x,z1]);T.push([x+2.1,z0])}for(let z=z0+2;z<=z1-2;z+=4.2){T.push([x0,z]);T.push([x1,z+1])}wpTrees(g,T,rnd);
   const Pp=[];for(let i=0;i<60&&Pp.length<28;i++){const x=cx+(rnd()-.5)*GW*.95,z=cz+(rnd()-.5)*GD*.95;if(blocks.some(b=>Math.abs(x-b.x)<b.w/2+.4&&Math.abs(z-b.z)<b.d/2+.4))continue;Pp.push([x,z])}wpPeople(g,Pp,rnd,[cx-GW/2+.4,cx+GW/2-.4,cz-GD/2+.4,cz+GD/2-.4],blocks);
@@ -3306,6 +3313,63 @@ function wpBgHook(){wpBgApply();document.querySelectorAll('.bcs-b3 .bcs-ctl,.bcs
 {const _f=fp3dBuild;fp3dBuild=function(a,b2,c,d){const ok=_f(a,b2,c,d);setTimeout(wpBgHook,0);return ok}}
 if(!IS_MOB&&typeof setTheme==='function'){const _st=setTheme;setTheme=function(m){_st(m);if(wpBgMode()==='auto'){B3.n=null;wpBgApply();try{bcsRefresh()}catch(e){}}}}
 if(IS_MOB&&typeof applyPrefs==='function'){const _ap=applyPrefs;applyPrefs=function(){_ap();setTimeout(()=>{if(wpBgMode()==='auto')wpBgApply()},0)}}
+/* ───────── 3e. Hierarchy: campus → main building (Campus A/B/C · Carpark P1/P2) → sub-building → floor ───────── */
+const WP_GROUPS=[{id:'CA',name:'Campus A',ic:'🏢',blocks:['A1','A2','A3','A4','A5','A6']},{id:'CB',name:'Campus B',ic:'🏢',blocks:['B1','B2','B3','B4','B5','B6']},{id:'CC',name:'Campus C',ic:'🏢',blocks:['C1','C5','C6']},{id:'P1',name:'Carpark P1',ic:'🅿',blocks:['P1']},{id:'P2',name:'Carpark P2',ic:'🅿',blocks:['P2']}];
+WPV.grp=(typeof bLS==='function'?bLS('wp_grp_'+BIZK,''):'')||null;
+function wpGrpOf(blk){return WP_GROUPS.find(G=>G.blocks.includes(blk))||null}
+function wpGrpStatus(id){const G=WP_GROUPS.find(x=>x.id===id);let bad=0,crit=0,n=0;(G?G.blocks:[]).forEach(k=>{const S=wpBlkStatus(k);bad+=S.bad;crit+=S.crit;n+=S.bad+S.crit});return{bad,crit,n,col:crit?'#EF4444':bad?'#F97316':'#22C55E'}}
+function wpGrpSet(id){const G=WP_GROUPS.find(x=>x.id===id);WPV.grp=G?G.id:null;bLSset('wp_grp_'+BIZK,WPV.grp||'');
+  if(G&&G.blocks.length===1){wpBlkSet(G.blocks[0]);return}
+  WPV.blk=null;bLSset('wp_blk_'+BIZK,'');if(BCS.sel){BCS.sel=null;bLSset('bcs_sel_'+BIZK,'')}B3.n=null;bcsRefresh()}
+{const _bs=wpBlkSet;wpBlkSet=function(code){if(code){const G=wpGrpOf(code);if(G){WPV.grp=G.id;bLSset('wp_grp_'+BIZK,G.id)}}else{WPV.grp=null;bLSset('wp_grp_'+BIZK,'')}return _bs(code)}}
+/* clicking a building on the campus: 1st click = main building, then sub-building */
+{const _sel=bcsSelect;bcsSelect=function(id){id=String(id||'');if(id.indexOf('blk:')===0&&!WPV.blk){const k=id.slice(4),G=wpGrpOf(k);if(G&&WPV.grp!==G.id){wpGrpSet(G.id);return}}
+  if(SLS_L[id]){const G=wpGrpOf(SLS_L[id].blk);if(G)WPV.grp=G.id}return _sel(id)}}
+{const _tp=bcsTip;bcsTip=function(e,id){const s=String(id||'');if(s.indexOf('grp:')===0||(s.indexOf('blk:')===0&&!WPV.grp)){const G=s.indexOf('grp:')===0?WP_GROUPS.find(x=>x.id===s.slice(4)):wpGrpOf(s.slice(4)),t=document.getElementById('bcs-tip');if(!G||!t)return;const S=wpGrpStatus(G.id);
+  t.innerHTML=`<b>${G.ic} SLS ${esc(G.name)}</b><br>${G.blocks.length>1?G.blocks.length+_t(' อาคารย่อย · ',' buildings · '):''}<span style="color:#F97316">${S.bad} ${_t('ชั้นเตือน','warn floors')}</span> · <span style="color:#EF4444">${S.crit} ${_t('วิกฤต','crit')}</span><br><small>${_t('คลิก = เข้าไปดูอาคาร','click = open')}</small>`;t.hidden=false;bcsTipMove(e);return}return _tp(e,id)}}
+/* chips: groups → sub-buildings → floors */
+bcsChips=function(){if(!(D&&D.bldg&&Array.isArray(D.bldg.blocks)&&D.bldg.blocks.length))return;const el=document.getElementById('bcs-chips');if(!el)return;const st=BCS.st||{};
+  const chip=(on,col,lab,n,click,tip)=>`<button class="bcs-chip ${on?'on':''}" style="--fc:${col}" onclick="${click}" ${tip?`onmouseenter="bcsTip(event,'${tip}')" onmousemove="bcsTipMove(event)" onmouseleave="bcsTipHide()"`:''}><i></i>${lab}${n?`<small>${n}</small>`:''}</button>`;
+  let s=`<button class="bcs-chip wp-allchip ${!WPV.grp?'on':''}" onclick="wpBlkSet(null)">🏙 ${_t('ทั้งแคมปัส','Whole campus')}</button>`;
+  s+=WP_GROUPS.map(G=>{const S=wpGrpStatus(G.id);return chip(WPV.grp===G.id,S.col,G.ic+' '+esc(G.name),S.n,`wpGrpSet('${G.id}')`,'grp:'+G.id)}).join('');
+  const G=WPV.grp&&WP_GROUPS.find(x=>x.id===WPV.grp);
+  if(G&&G.blocks.length>1){s+=`<span class="wp-chipsep">${esc(G.name)} ›</span>`+G.blocks.map(k=>{const S=wpBlkStatus(k);return chip(WPV.blk===k,S.col,esc(k),S.bad+S.crit,`wpBlkSet('${k}')`,'blk:'+k)}).join('')}
+  if(WPV.blk){s+=`<span class="wp-chipsep">${esc(WPV.blk)} ›</span>`+bcsFloors().filter(f=>f.blk===WPV.blk).sort((a,c)=>wpLv(c.id)-wpLv(a.id)).map(f=>{const o=st[f.id],nb=o?o.items.filter(x=>x.rs.bad).length:0;return chip(BCS.sel===f.id,bcsColor(o),_t('ชั้น ','Fl ')+esc(wpFlLabel(f.id)),nb,`bcsSelect('${f.id}')`,f.id)}).join('')}
+  el.innerHTML=s;const on=el.querySelectorAll('.bcs-chip.on');const last=on[on.length-1];if(last&&last.scrollIntoView)try{last.scrollIntoView({block:'nearest',inline:'center'})}catch(e){}};
+/* focus the camera on the selected main building (campus views) */
+function wpFocusGrp(){if(!WPV.grp||WPV.blk||!B3.group)return;const G=WP_GROUPS.find(x=>x.id===WPV.grp);if(!G)return;const bs=D.bldg.blocks.filter(b=>G.blocks.includes(b.id));if(!bs.length)return;
+  const x0=Math.min(...bs.map(b=>b.x-b.w/2)),x1=Math.max(...bs.map(b=>b.x+b.w/2)),z0=Math.min(...bs.map(b=>b.z-b.d/2)),z1=Math.max(...bs.map(b=>b.z+b.d/2));
+  WPC.tx=-(x0+x1)/2;WPC.tz=-(z0+z1)/2;const asp=Math.max(.5,(B3.el&&B3.el.clientWidth||900)/(B3.el&&B3.el.clientHeight||560)),tv=Math.tan(17.5*Math.PI/180);
+  const fit=Math.max((x1-x0+6)/2/(tv*asp),(z1-z0+6)/2/tv)*1.35,key='grp'+G.id;if(B3.grpKey!==key){B3.grpKey=key;B3.rad=fit;B3.tcy=1.5;B3.ph=.95}}
+{const _cl=wpCampusLight;wpCampusLight=function(fl,st){const ok=_cl(fl,st);if(WPV.grp)wpFocusGrp();else if(B3.grpKey){B3.grpKey=null;B3.rad=B3.fit;B3.tcy=1.2}return ok}}
+{const _c3=wpCampus3D;wpCampus3D=function(fl,st){const ok=_c3(fl,st);if(WPV.grp)wpFocusGrp();else if(B3.grpKey){B3.grpKey=null;B3.rad=B3.fit;B3.tcy=1.2}return ok}}
+/* mini panel = the main building (group of sub-buildings, or the car park itself floor by floor) */
+wpMiniMount=function(id){const host=B3.el;if(!host)return;let m=host.querySelector('.wp-mini');if(!m){m=document.createElement('div');m.className='wp-mini';host.appendChild(m)}
+  const G=wpGrpOf(id)||{id:'',name:id,ic:'🏢',blocks:[id]},b=D.bldg.blocks.find(x=>x.id===id),S=wpBlkStatus(id),st=WPV.stat||{},multi=G.blocks.length>1;
+  m.innerHTML=`<div class="wp-mini-h"><b>${G.ic} ${multi?esc(id):esc(G.name)}</b><small>${multi?esc(G.name)+' · ':''}${S.n} ${_t('ชั้น','floors')}</small>${multi?`<button onclick="wpGrpSet('${G.id}')" title="${_t('กลับไป ','Back to ')}${esc(G.name)}">↩</button>`:''}<button onclick="wpBlkSet(null)" title="${_t('ทั้งแคมปัส','Whole campus')}">🏙</button></div><div class="wp-mini-c" id="wp-mini-c"></div>
+  <div class="wp-mini-l"><i style="color:#22C55E">●</i>OK <i style="color:#F97316">●</i>Warn <i style="color:#EF4444">●</i>Crit · ${b&&b.type==='carpark'?'🚗 '+(st.cars||0)+_t(' คัน',' cars'):'👥 '+(st.ppl||0)+_t(' คน',' people')} <span class="wp-demo">DEMO</span></div>`;
+  const c=m.querySelector('#wp-mini-c');if(!c)return;
+  if(!WPV.m3){try{const r=new THREE.WebGLRenderer({antialias:true,alpha:true});r.outputEncoding=THREE.sRGBEncoding;r.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    const sc=new THREE.Scene();sc.add(new THREE.HemisphereLight(0xffffff,0x6b7a90,1));const dl=new THREE.DirectionalLight(0xffffff,.7);dl.position.set(20,40,15);sc.add(dl);
+    WPV.m3={r,sc,cam:new THREE.PerspectiveCamera(32,1,.1,500),g:null,th:.7,rc:new THREE.Raycaster(),pick:[]};
+    r.domElement.style.cursor='pointer';r.domElement.addEventListener('click',e=>{const M=WPV.m3,bb=r.domElement.getBoundingClientRect();M.rc.setFromCamera({x:((e.clientX-bb.left)/bb.width)*2-1,y:-((e.clientY-bb.top)/bb.height)*2+1},M.cam);const h=M.rc.intersectObjects(M.pick,false)[0];if(!h)return;if(h.object.userData.fid)bcsSelect(h.object.userData.fid);else if(h.object.userData.blk)wpBlkSet(h.object.userData.blk)});
+    const loop=()=>{requestAnimationFrame(loop);const M=WPV.m3,cv=M.r.domElement;if(!cv.isConnected||cv.offsetParent===null)return;const w=cv.parentElement.clientWidth||220,h=cv.parentElement.clientHeight||190;
+      if(M._w!==w||M._h!==h){M._w=w;M._h=h;M.r.setSize(w,h);M.cam.aspect=w/h;M.cam.updateProjectionMatrix()}M.th+=.003;const R=M.rad||30;M.cam.position.set(M.cx+R*Math.sin(M.th)*.8,(M.cy||0)+R*.6,M.cz+R*Math.cos(M.th)*.8);M.cam.lookAt(M.cx,M.cy||1,M.cz);M.r.render(M.sc,M.cam)};requestAnimationFrame(loop)}catch(e){return}}
+  const M=WPV.m3;c.appendChild(M.r.domElement);M._w=0;
+  if(M.g){M.g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(o.material.map)o.material.map.dispose();o.material.dispose()}});M.sc.remove(M.g)}
+  const g=new THREE.Group();M.g=g;M.pick=[];const bs=D.bldg.blocks.filter(k=>G.blocks.includes(k.id)),stF=BCS.st||{};
+  const x0=Math.min(...bs.map(k=>k.x-k.w/2)),x1=Math.max(...bs.map(k=>k.x+k.w/2)),z0=Math.min(...bs.map(k=>k.z-k.d/2)),z1=Math.max(...bs.map(k=>k.z+k.d/2));
+  const gr=new THREE.Mesh(new THREE.BoxGeometry(x1-x0+4,.2,z1-z0+4),new THREE.MeshStandardMaterial({color:F3C('#475569'),roughness:.9}));gr.position.set((x0+x1)/2,-.1,(z0+z1)/2);g.add(gr);let top=0;
+  bs.forEach(k=>{const fs=bcsFloors().filter(f=>f.blk===k.id).sort((a,c)=>wpLv(a.id)-wpLv(c.id)),FH=k.type==='carpark'?.55:1,on=k.id===id;
+    fs.forEach((f,i)=>{const o=stF[f.id]||{},sel=BCS.sel===f.id,col=sel?'#FFFFFF':!on?'#CBD5E1':o.crit?'#EF4444':o.bad?'#F97316':'#22C55E';
+      const mat=new THREE.MeshStandardMaterial({color:F3C(col),roughness:.5,emissive:F3C(sel?'#F97316':'#000000'),emissiveIntensity:sel?.6:0,transparent:!on,opacity:on?1:.5});
+      const ms=new THREE.Mesh(new THREE.BoxGeometry(k.w,FH*.9,k.d),mat);ms.position.set(k.x,i*FH+FH*.45,k.z);if(on)ms.userData.fid=f.id;else ms.userData.blk=k.id;g.add(ms);M.pick.push(ms)});
+    const H=fs.length*FH;top=Math.max(top,H);
+    if(on){const e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(k.w+.15,H+.1,k.d+.15)),new THREE.LineBasicMaterial({color:0xffffff}));e.position.set(k.x,H/2,k.z);g.add(e)}});
+  M.sc.add(g);M.cx=(x0+x1)/2;M.cz=(z0+z1)/2;M.cy=top*.4;M.rad=Math.max(x1-x0,z1-z0,top*1.4)*1.55+4};
+
+/* migrate an old cached registry (CLS → BCS) */
+{const c=LS.get('psd_ifm_wp_reg',null);if(Array.isArray(c)&&c.some(b=>b.code==='CLS'&&b.name==='CLS')&&!c.some(b=>b.code==='BCS')){LS.set('psd_ifm_wp_reg',c.map(b=>b.code==='CLS'&&b.name==='CLS'?Object.assign({},WP_REG0.find(x=>x.code==='BCS')):b))}}
 
 /* ───────── 5. E-mail OTP login (@bhirajburi.co.th) + request access ───────── */
 const WP_POS=[['tech_eng','ช่างซ่อมบำรุง (M&E)','M&E technician','eng'],['tech_fac','ช่างอาคาร / Facility','Facility technician','fac'],['hk','แม่บ้าน / ทำความสะอาด','Housekeeper','hk'],
@@ -3483,10 +3547,17 @@ if(!IS_MOB){
   const _wpRepV=VIEWS.reports;VIEWS.reports=()=>{const h=_wpRepV(),i=h.indexOf('<div class="alert');return i>0?h.slice(0,i)+xlCardHTML()+h.slice(i):xlCardHTML()+h};
   const _wpDashV=VIEWS.dashboard;VIEWS.dashboard=()=>{const h=_wpDashV();if(BIZK!=='workplace')return h;const A=iotAlarmList();
     return`<div class="wp-banner"><div><b>🏙 3D-iFM · ${esc(D.site)}</b><span>${D.bldg&&D.bldg.blocks?D.bldg.blocks.length+_t(' อาคาร · ',' blocks · ')+D.bldg.floors.length+_t(' ชั้น · ',' floors · '):''}${D.areas.length} Unit · 📡 ${iotDevs().length} IoT${A.length?` · <b style="color:#F87171">⚠ ${A.length} ${_t('แจ้งเตือน','alarms')}</b>`:''}</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" onclick="showView('front')">🌐 ${_t('หน้า 3D','3D page')}</button><button class="btn btn-ghost btn-sm" onclick="showView('iot')">📡 IoT</button><button class="btn btn-ghost btn-sm" onclick="showView('ifm3d')">🌐 Workplace</button></div></div>`+h};
-  const _wpSetV=VIEWS.settings;VIEWS.settings=()=>{const h=_wpSetV(),L=wpReg();
-    const vis=`<div class="card no-lift" style="margin-top:16px"><div class="card-t">🏙 ${_t('อาคารที่แสดง — กลุ่ม Workplace','Visible buildings — Workplace')}<small>${_t('ติ๊กเลือกอาคารที่จะแสดงบนแผนที่ 3D (ตามสิทธิ์ของผู้ใช้)','tick to show on the 3D map')}</small></div><div class="wp-ticks">${L.filter(b=>{const u=me();return!authOnline()||(u&&(u.role==='admin'||hasAcc(u,'workplace',b.code)))}).map(b=>`<label><input type="checkbox" ${wpVisible(b)?'checked':''} onchange="wpSetVis('${esc(b.code)}',this.checked)"> 🏢 <b>${esc(b.code)}</b> ${esc(b.name)} <small>${esc(b.status)}</small></label>`).join('')}</div>${myRole()==='admin'||(!authOnline()&&cap('set'))?`<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" onclick="wpEdit()">＋ Add Building</button> <button class="btn btn-ghost btn-sm" onclick="showView('ifm3d')">🌐 ${_t('จัดการกลุ่มอาคาร','Manage buildings')} ›</button></div>`:''}
-      <div class="sec-sub" style="margin-top:10px">${_t('ที่อยู่ภาพผังพื้น (Floor plan) ของ SLS','SLS floor-plan folder')}: <input class="fc" style="display:inline-block;width:260px" value="${esc(wpPlanBase())}" ${cap('set')?'':'disabled'} onchange="LS.set('psd_ifm_plan_base',this.value.trim()||'plans/SLS/');toast('✅')"></div></div>`;
-    return h+vis};
+  const _wpSetV=VIEWS.settings;VIEWS.settings=()=>{let h=_wpSetV();const u=me(),adm=myRole()==='admin'||(!authOnline()&&cap('set')),cur=gasSite()||LS.get('psd_ifm_site_workplace','SLS');
+    const L=wpReg().filter(b=>b.status!=='hidden'||adm).filter(b=>!authOnline()||(u&&(u.role==='admin'||hasAcc(u,'workplace',b.code))));
+    const cards=`<div class="biz-grid wp-bgrid" style="margin-bottom:10px">${L.map(b=>{const vis=wpVisible(b),on=b.code===cur;return`<div class="biz-card wp-bcard ${on?'on':''} ${vis?'':'off'}" style="--bzc:${esc(b.color||'#3B82F6')}" onclick="wpOpenSite('${esc(b.code)}','front')" title="${_t('คลิก = เปิด 3D อาคารนี้','click = open 3D')}">
+      <span class="i">${b.type==='campus'?'🏙':b.type==='carpark'?'🅿':'🏢'}</span><span class="n">${esc(b.code)} · ${esc(b.name)}</span>
+      <span class="d">${b.code==='SLS'?'Campus A · B · C · Carpark P1 · P2':esc(({tower:'Tower',office:'Office',mall:'Community mall',carpark:'Car park',campus:'Campus'})[b.type]||b.type)+' · '+(+b.floors||0)+_t(' ชั้น',' floors')}</span>
+      <span class="d">${b.status==='active'?'<span class="badge b-green">'+_t('ใช้งาน','Active')+'</span>':'<span class="badge b-amber">'+_t('เตรียมขยาย','Planned')+'</span>'}${on?' <span class="badge b-blue">'+_t('กำลังเปิด','Current')+'</span>':''}</span>
+      <label class="wp-bvis" onclick="event.stopPropagation()"><input type="checkbox" ${vis?'checked':''} onchange="wpSetVis('${esc(b.code)}',this.checked)"> ${_t('แสดงในระบบ','Show')}</label>${adm?`<button class="wp-bedit" onclick="event.stopPropagation();wpEdit('${esc(b.code)}')" title="${_t('แก้ไขอาคาร','Edit')}">✏</button>`:''}</div>`}).join('')}
+      ${adm?`<button class="biz-card wp-badd" onclick="wpEdit()"><span class="i">＋</span><span class="n">Add Building</span><span class="d">${_t('เพิ่มอาคารในกลุ่ม Workplace','Add a Workplace building')}</span></button>`:''}</div>
+      <div class="sec-sub" style="margin:0 0 18px">${_t('ติ๊ก “แสดงในระบบ” เพื่อเลือกอาคารที่จะเห็นในหน้า 3D / แถบเลือกอาคาร · คลิกการ์ด = เปิด 3D อาคารนั้น','Tick “Show” to choose visible buildings · click a card to open it')} · ${_t('ภาพผังพื้น SLS','SLS plan folder')}: <input class="fc" style="display:inline-block;width:200px;padding:3px 8px" value="${esc(wpPlanBase())}" ${cap('set')?'':'disabled'} onchange="LS.set('psd_ifm_plan_base',this.value.trim()||'plans/SLS/');toast('✅')"></div>`;
+    h=h.replace(/<div class="biz-grid" style="margin-bottom:18px">[\s\S]*?<\/button><\/div>/,cards);
+    return h.replace('เลือกประเภทธุรกิจ — แต่ละธุรกิจมีพื้นที่, ระบบวิศวกรรม, มาตรฐาน Compliance, รายการผ้า, จุดรักษาความปลอดภัย และเป้า KPI ของตัวเอง',_t('กลุ่ม Workplace (BHIRAJ BURI) — เลือกอาคารที่จะแสดงในระบบ · ชุดข้อมูล · บัญชีผู้ใช้','Workplace buildings · data set · account'))};
   const nav0=NAV[0][2];if(!nav0.some(x=>x[0]==='ifm3d')){const i=nav0.findIndex(x=>x[0]==='bcs');nav0.splice(i,0,['ifm3d','🌐','3D-iFM Workplace','กลุ่มอาคาร BHIRAJ BURI']);nav0.splice(i+2,0,['iot','📡','IoT Monitoring','เซ็นเซอร์ Real-time'])}
   const _wpRender0=render;render=function(){_wpRender0();document.title='PSD_eNGINNo 3D-iFM'+(BIZK==='workplace'?' · '+(gasSite()||'SLS'):'')+' · '+TITLES[CUR];const bc=document.getElementById('tb-bc');if(bc)bc.textContent=bc.textContent.replace('PSD eNGINNo › IFM','PSD eNGINNo › 3D-iFM')};
   TITLES.bcs='Building Critical Status · Campus 3D';
