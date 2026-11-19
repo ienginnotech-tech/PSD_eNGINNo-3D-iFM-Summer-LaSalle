@@ -758,6 +758,22 @@ body.wpf-on #main{margin-left:0!important}body.wpf-on #content{padding:0!importa
 
 .wp-actl{position:absolute;left:12px;bottom:30px;z-index:5;display:flex;flex-wrap:wrap;gap:4px 10px;background:rgba(15,23,42,.82);color:#E2E8F0;border:1px solid rgba(148,163,184,.25);border-radius:9px;padding:5px 10px;font-size:11px;font-weight:700;pointer-events:none}
 .wp-actl i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+
+.wp-flcard .wp-ring.bad{cursor:pointer;transition:transform .12s}.wp-flcard .wp-ring.bad:hover{transform:translateY(-1px)}
+.wp-flcard .wp-ring.sel{outline:2px solid #fff;outline-offset:1px}
+.wpd-al:hover{text-decoration:underline}
+.wpd-back{border:1px solid var(--border);background:var(--bg);color:inherit;border-radius:7px;padding:1px 8px;cursor:pointer;font-weight:800;margin-right:4px;font-family:inherit}
+.wpd-tabs{display:flex;gap:4px;padding:4px 8px 6px;flex-wrap:wrap}
+.wpd-tabs button{border:1px solid var(--border);background:var(--bg);color:inherit;border-radius:99px;padding:3px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.wpd-tabs button.on{background:var(--ac,#F97316);border-color:var(--ac,#F97316);color:#fff}.wpd-tabs i{font-style:normal;opacity:.85;margin-left:2px}
+.wpd-g{margin-bottom:8px}.wpd-gh{display:flex;align-items:center;gap:6px;font-size:12px;margin:6px 2px}.wpd-gh i{width:9px;height:9px;border-radius:3px}.wpd-gh span{opacity:.6;font-size:11px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wpd-gh em{font-style:normal;background:var(--ac);color:#fff;border-radius:99px;padding:0 8px;font-weight:800;font-size:11px}
+.wpd-row{border:1px solid var(--border);border-left:4px solid var(--ac);border-radius:9px;padding:7px 9px;margin-bottom:6px;background:var(--bg);cursor:pointer}
+.wpd-row.crit{border-left-color:#EF4444}.wpd-row:hover{border-color:var(--ac)}
+.wpd-r1{display:flex;gap:6px;align-items:center;font-size:12.5px}.wpd-r1 b{flex:1;min-width:0;font-weight:600}
+.wpd-r2{font-size:11.5px;opacity:.72;margin-top:3px}
+.wpd-cr{background:#EF4444;color:#fff;font-size:10px;font-weight:800;border-radius:6px;padding:1px 6px;white-space:nowrap}
+.wpd-hint{font-size:11px;opacity:.55;text-align:center;margin:6px 0}
 </style>
 </head>
 <body>
@@ -3689,9 +3705,9 @@ wpMiniMount=function(id){const host=B3.el;if(!host)return;let m=host.querySelect
   const x0=Math.min(...bs.map(k=>k.x-k.w/2)),x1=Math.max(...bs.map(k=>k.x+k.w/2)),z0=Math.min(...bs.map(k=>k.z-k.d/2)),z1=Math.max(...bs.map(k=>k.z+k.d/2));
   const gr=new THREE.Mesh(new THREE.BoxGeometry(x1-x0+4,.2,z1-z0+4),new THREE.MeshStandardMaterial({color:F3C('#475569'),roughness:.9}));gr.position.set((x0+x1)/2,-.1,(z0+z1)/2);g.add(gr);let top=0;
   bs.forEach(k=>{const fs=bcsFloors().filter(f=>f.blk===k.id).sort((a,c)=>wpLv(a.id)-wpLv(c.id)),FH=k.type==='carpark'?.55:1,on=k.id===id;
-    fs.forEach((f,i)=>{const o=stF[f.id]||{},sel=BCS.sel===f.id,col=sel?'#FFFFFF':!on?'#CBD5E1':o.crit?'#EF4444':o.bad?bcsColor(o):'#22C55E';
-      const mat=new THREE.MeshStandardMaterial({color:F3C(col),roughness:.5,emissive:F3C(sel?'#F97316':'#000000'),emissiveIntensity:sel?.6:0,transparent:!on,opacity:on?1:.5});
-      const ms=new THREE.Mesh(new THREE.BoxGeometry(k.w,FH*.9,k.d),mat);ms.position.set(k.x,i*FH+FH*.45,k.z);if(on)ms.userData.fid=f.id;else ms.userData.blk=k.id;g.add(ms);M.pick.push(ms)});
+    fs.forEach((f,i)=>{const o=stF[f.id]||{},sel=BCS.sel===f.id,col=!on?'#CBD5E1':o.crit?'#EF4444':o.bad?bcsColor(o):sel?'#FFFFFF':'#22C55E';
+      const mat=new THREE.MeshStandardMaterial({color:F3C(col),roughness:.5,emissive:F3C(sel?(o.bad?col:'#F97316'):'#000000'),emissiveIntensity:sel?.45:0,transparent:!on,opacity:on?1:.5});
+      const ms=new THREE.Mesh(new THREE.BoxGeometry(k.w,FH*.9,k.d),mat);ms.position.set(k.x,i*FH+FH*.45,k.z);if(on)ms.userData.fid=f.id;else ms.userData.blk=k.id;g.add(ms);M.pick.push(ms);if(sel){const e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(k.w+.12,FH*.9+.06,k.d+.12)),new THREE.LineBasicMaterial({color:0xFFFFFF}));e.position.copy(ms.position);g.add(e)}});
     const H=fs.length*FH;top=Math.max(top,H);
     if(on){const e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(k.w+.15,H+.1,k.d+.15)),new THREE.LineBasicMaterial({color:0xffffff}));e.position.set(k.x,H/2,k.z);g.add(e)}});
   M.sc.add(g);M.cx=(x0+x1)/2;M.cz=(z0+z1)/2;M.cy=top*.4;M.rad=Math.max(x1-x0,z1-z0,top*1.4)*1.55+4};
@@ -4007,7 +4023,7 @@ function wpfSide(){const PR={P1:'#EF4444',P2:'#F97316',P3:'#EAB308',P4:'#64748B'
   else if(WPF.side==='iot')body=io.length?io.map(d=>{const e=iotEval(d),T=IOT_T[d.type]||{ic:'📡'};return`<div class="wpf-row" onclick="iotOpen('${esc(d.id)}')"><div class="wpf-r1"><span class="wpf-ic">${T.ic}</span><b>${esc(d.name)}</b><span class="wpf-pr" data-iots="${esc(d.id)}" style="background:${IOT_LV[e.lv][0]}">${IOT_LV[e.lv][1]}</span></div><div class="wpf-r2">${esc(d.area||'')}<span class="wpf-val" data-iotm="${esc(d.id)}">${esc(iotMainTxt(d))}</span></div></div>`}).join(''):`<div class="wpf-empty">📡 ${_t('ยังไม่มีอุปกรณ์ IoT','No IoT devices')}</div>`;
   else body=A.length?A.map(a=>`<div class="wpf-row" onclick="showView('${esc(a.v||'dashboard')}')"><div class="wpf-r1"><span class="wpf-dot" style="background:${a.lv==='red'?'#EF4444':a.lv==='yellow'?'#F59E0B':'#3B82F6'}"></span><b>${esc(a.m)}</b></div>${a.s?`<div class="wpf-r2">${esc(a.s)}</div>`:''}</div>`).join(''):`<div class="wpf-empty">✅ ${_t('ไม่มีการแจ้งเตือน','No alerts')}</div>`;
   return`<div class="wpf-sec1"><div class="wpf-stabs">${tab('al','🔔 '+_t('แจ้งเตือน','Alerts'),A.length)}${tab('wr','🛠 Work Request',open.length)}${tab('iot','📡 IoT',io.length)}</div><div class="wpf-list">${body}</div></div>
-  <div class="wpf-sec2">${wpfSvc()}</div>
+  <div class="wpf-sec2">${WPF.det&&typeof wpfDet==='function'&&bcsFloorById(WPF.det.fid)?wpfDet():wpfSvc()}</div>
   ${cap('e')||cap('wr')?`<button class="wpf-new" onclick="quickWR()">＋ ${_t('แจ้งงาน','New work request')}</button>`:''}`}
 /* Hard & Soft services — คลิก = ไปหน้าบริการนั้นในหลังบ้าน */
 function wpfSvc(){const on=SVC_ON();if(!on.length)return'';
@@ -4034,6 +4050,46 @@ TITLES.front='3D-iFM';
 }
 setInterval(()=>{const c=document.getElementById('wpf-clock');if(c)c.textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})},20000);
 /*@@IFM3D-END@@*/
+/* ───────── 3D front: รายละเอียดกิจกรรมของชั้น (ไม่ต้องไปหลังบ้าน) ───────── */
+if(typeof WPF!=='undefined')WPF.det=null;
+const WP_RN={r1:['🛠','WR','งานแจ้งซ่อม / แจ้งบริการค้าง','Open work requests'],r2:['⚙','HARD','อุปกรณ์ Down / Warning · Defect · IoT','Assets · defects · IoT'],r3:['🗓','PPM','แผน PM เกิน / ครบใน 7 วัน · แม่บ้าน Missed','PM overdue / due · HK missed'],r4:['🧹','SOFT','ความสะอาด · Pest · เหตุ รปภ.','Cleanliness · pest · security']};
+/* รายการจริงต่อพื้นที่ (ตรรกะเดียวกับ 4-Ring) */
+function wpActItems(a,ring){const n=a.name,in7=addD(todayS,7),T=P().target,L=[];
+  const row=(ent,id,ic,t,s,lv,due)=>L.push({ent,id,ic,t,s,lv,due,area:n});
+  if(ring==='r1')D.tickets.filter(t=>t.area===n&&bcsOpenWR(t)&&svcOn(t.service)).forEach(t=>{const sl=slaOf(t),cr=t.priority==='P1'||sl.s==='breach';row('tickets',t.id,(SVC[t.service]||{ic:'🛠'}).ic,(t.category||'')+(t.desc?' — '+t.desc:''),[t.id,t.priority,t.status,t.assignee&&'👤 '+t.assignee,sl.s==='breach'&&_t('เกิน SLA','SLA breach')].filter(Boolean).join(' · '),cr?'crit':'warn')});
+  if(ring==='r2'){const as=svcOn('eng')?D.assets.filter(x=>x.area===n):[];
+    as.filter(x=>x.status==='Down'||x.status==='Warning').forEach(x=>row('assets',x.id,'⚙',x.name,[x.system,'Criticality '+(x.crit||'-'),x.status].join(' · '),x.status==='Down'?'crit':'warn'));
+    (svcOn('fac')?D.defects.filter(d=>d.area===n&&d.status!=='Closed'&&d.severity!=='Low'):[]).forEach(d=>row('defects',d.id,'🏗',d.element+' — '+d.desc,[d.id,d.severity,d.status,d.target&&_t('กำหนด ','due ')+d.target].filter(Boolean).join(' · '),d.severity==='Critical'?'crit':'warn'));
+    iotDevs().filter(d=>d.area===n).forEach(d=>{const e=iotEval(d);if(e.lv==='warn'||e.lv==='crit')L.push({iot:d.id,ic:(IOT_T[d.type]||{ic:'📡'}).ic,t:d.name,s:'IoT · '+e.short,lv:e.lv,area:n})})}
+  if(ring==='r3'){const items=new Set((svcOn('eng')?D.assets.filter(x=>x.area===n):[]).map(x=>x.name).concat([n]));
+    D.pm.filter(p=>svcOn(p.service)&&items.has(p.item)&&p.status!=='Done'&&p.dueDate<=in7).forEach(p=>{const od=p.dueDate<todayS;row('pm',p.id,'🗓',p.task||p.item,[p.id,p.item!==n&&p.item,(od?_t('เกินกำหนด ','Overdue ')+p.dueDate:_t('ครบกำหนด ','Due ')+p.dueDate),p.freq,p.assignee&&'👤 '+p.assignee].filter(Boolean).join(' · '),od?'warn':'info',p.dueDate)});
+    (svcOn('hk')?D.hkTasks.filter(h=>h.area===n&&h.status==='Missed'):[]).forEach(h=>row('hkTasks',h.id,'🧹',h.task,[h.id,_t('แม่บ้าน Missed','HK missed'),h.shift,h.staff&&'👤 '+h.staff].filter(Boolean).join(' · '),'warn'))}
+  if(ring==='r4'){if(svcOn('hk')){const ins=D.hkInsp.filter(x=>x.area===n&&x.date>=addD(todayS,-30)).sort((x,y)=>y.date.localeCompare(x.date));const av=ins.length?avg(ins.map(x=>x.score)):null;
+      if(av!=null&&((ins[0]&&+ins[0].score<85)||av<Math.min(T.hk,90)-5))row('hkInsp',ins[0].id,'🧽',_t('ความสะอาดต่ำกว่าเกณฑ์','Cleanliness below target'),[_t('ล่าสุด ','last ')+ins[0].score+'%',_t('เฉลี่ย 30 วัน ','30-day avg ')+av+'%',ins[0].inspector&&'👤 '+ins[0].inspector,ins[0].remark].filter(Boolean).join(' · '),'warn')}
+    (svcOn('pest')?D.pestSt.filter(s=>s.area===n&&s.activity==='High'):[]).forEach(s=>row('pestSt',s.id,'🐀',_t('พบความเคลื่อนไหวสูง — ','High activity — ')+s.type,[s.id,s.lastCheck&&_t('ตรวจ ','checked ')+s.lastCheck,s.remark].filter(Boolean).join(' · '),'crit'));
+    (svcOn('sec')?D.secInc.filter(s=>s.area===n&&s.status!=='Closed'&&s.severity!=='Low'):[]).forEach(s=>row('secInc',s.id,'🛡',s.type,[s.id,s.severity,s.status,s.date].filter(Boolean).join(' · '),s.severity==='High'||s.severity==='Critical'?'crit':'warn'))}
+  return L}
+function wpDetOpen(fid,ring,aid){WPF.det={fid,ring:ring||'',aid:aid||''};wpDetPaint()}
+function wpDetClose(){if(typeof WPF!=='undefined')WPF.det=null;wpDetPaint()}
+function wpDetPaint(){const el=document.querySelector('.wpf-sec2');if(el)el.innerHTML=WPF.det?wpfDet():wpfSvc();document.querySelectorAll('.wp-flcard .wp-ring').forEach(b=>b.classList.toggle('sel',!!WPF.det&&b.dataset.k===WPF.det.ring))}
+function wpfDet(){const X=WPF.det,f=bcsFloorById(X.fid);if(!f){if(typeof WPF!=='undefined')WPF.det=null;return wpfSvc()}
+  const o=(BCS.st||{})[X.fid]||{items:[]},rings=X.ring?[X.ring]:['r1','r2','r3','r4'];
+  const areas=o.items.filter(x=>x.rs.bad&&(!X.aid||x.a.id===X.aid));let tot=0;
+  const body=rings.map(k=>{const R=WP_RN[k],c=WP_AC[k];const rows=areas.flatMap(x=>x.rs[k]&&x.rs[k].bad?wpActItems(x.a,k):[]);tot+=rows.length;if(!rows.length&&X.ring!==k)return'';
+    return`<div class="wpd-g" style="--ac:${c}"><div class="wpd-gh"><i style="background:${c}"></i>${R[0]} <b>${R[1]}</b> <span>${_t(R[2],R[3])}</span><em>${rows.length}</em></div>`+
+      (rows.length?rows.map(r=>`<div class="wpd-row ${r.lv}" ${r.iot?`onclick="iotOpen('${esc(r.iot)}')"`:r.ent?`onclick="openForm('${r.ent}','${esc(r.id)}')"`:''}><div class="wpd-r1"><span>${r.ic}</span><b>${esc(String(r.t||'').slice(0,90))}</b>${r.lv==='crit'?`<span class="wpd-cr">⚠ ${_t('วิกฤต','Critical')}</span>`:''}</div><div class="wpd-r2">📍 ${esc(r.area)} · ${esc(r.s||'')}</div></div>`).join(''):`<div class="wpf-empty" style="padding:14px">✅ ${_t('ไม่มีรายการ','Nothing open')}</div>`)+`</div>`}).join('');
+  const ttl=X.aid?(o.items.find(x=>x.a.id===X.aid)||{a:{name:''}}).a.name:f.name;
+  return`<div class="wpf-sh"><button class="wpd-back" onclick="wpDetClose()" title="${_t('กลับไปรายการบริการ','Back to services')}">←</button>${X.ring?WP_RN[X.ring][0]+' '+WP_RN[X.ring][1]:'📋 '+_t('กิจกรรมทั้งหมด','All activity')} · ${esc(ttl)}<small>${tot} ${_t('รายการ','items')}</small></div>
+   <div class="wpd-tabs">${['','r1','r2','r3','r4'].map(k=>{const n=k?(o[k]||0):o.items.filter(x=>x.rs.bad).length;return`<button class="${X.ring===k?'on':''}" ${k?`style="--ac:${WP_AC[k]}"`:''} onclick="wpDetOpen('${X.fid}','${k}','${esc(X.aid)}')">${k?WP_RN[k][1]:_t('ทั้งหมด','All')}${n?` <i>${n}</i>`:''}</button>`}).join('')}</div>
+   <div class="wpf-slist">${body||`<div class="wpf-empty">✅ ${_t('ไม่มีกิจกรรมค้างในชั้นนี้','No open activity on this floor')}</div>`}<div class="wpd-hint">${_t('แตะรายการเพื่อดู / แก้ไข / ปิดงานได้ทันที','Tap an item to view / edit / close it')}</div></div>`}
+/* floor card: ring chips + area lines clickable */
+if(typeof wpFlCard==='function'&&typeof WPF!=='undefined'){const _fc=wpFlCard;wpFlCard=function(){_fc();const c=B3.el&&B3.el.querySelector('.wp-flcard');const fid=BCS.sel;
+  if(WPF.det&&WPF.det.fid!==fid){WPF.det=fid?{fid,ring:WPF.det.ring,aid:''}:null;wpDetPaint()}
+  if(!c||!fid)return;const LB=['r1','r2','r3','r4'];
+  c.querySelectorAll('.wp-flc-r .wp-ring').forEach((b,i)=>{const k=LB[i];b.dataset.k=k;b.style.cursor='pointer';b.title=_t('ดูรายละเอียดกิจกรรม','Show activity details');b.onclick=()=>wpDetOpen(fid,WPF.det&&WPF.det.ring===k&&!WPF.det.aid?'':k)});
+  const o=(BCS.st||{})[fid]||{items:[]},bad=o.items.filter(x=>x.rs.bad);
+  c.querySelectorAll('.wp-flc-l > div').forEach((d,i)=>{const x=bad[i];if(!x)return;d.style.cursor='pointer';d.classList.add('wpd-al');d.onclick=()=>wpDetOpen(fid,'',x.a.id)});
+  if(WPF.det)wpDetPaint()}}
 
 // boot
 applyTheme();authBoot();load();buildChrome();renderUser();if(!me())showLogin();
