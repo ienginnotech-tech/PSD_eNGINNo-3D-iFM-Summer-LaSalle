@@ -3815,6 +3815,87 @@ function xlApply(){if(!cap('set')){denied();return}const R=XL.rows;if(!R)return;
 function xlCardHTML(){return`<div class="wp-guide"><b>📊 Excel Database — ${_t('ทุกบริการใน 3D-iFM','all 3D-iFM services')}</b><div class="wp-note">${_t('ดาวน์โหลดแม่แบบ → ทีมกรอกข้อมูลใน Excel (พื้นที่/Unit, ทรัพย์สิน, แผน PM, พนักงาน, ผู้รับจ้าง, อุปกรณ์ IoT ฯลฯ) → นำเข้า → ซิงค์ขึ้น Google Sheets อัตโนมัติ','Download → fill in Excel → import → auto-sync to Google Sheets')}</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="wp-btn" onclick="xlDownload(false)">⬇ ${_t('แม่แบบ Excel (ว่าง)','Blank template')}</button><button class="wp-btn" onclick="xlDownload(true)">⬇ ${_t('Export ข้อมูลทั้งหมด (Excel)','Export all (Excel)')}</button>${cap('set')?`<button class="wp-btn wp-pri" onclick="xlPick()">⬆ Import Excel</button>`:''}</div></div>`}
 
+/* ───────── 5b. V2.11 Invite-only: ใช้ได้เฉพาะอีเมลที่ Admin เพิ่มไว้ ───────── */
+OTS.flags={signup:false,adminPw:true};
+async function wpAuthFlags(){if(!authOnline())return OTS.flags;try{const j=await api('bldgPublic');OTS.flags={signup:!!j.signup,adminPw:j.adminPw!==false}}catch(e){}return OTS.flags}
+const WP_INV_NOTE=()=>_t('🔒 ใช้ได้เฉพาะอีเมลที่ Admin เพิ่มสิทธิ์ไว้แล้ว · ยังไม่มีสิทธิ์ → ติดต่อ Admin / FM ของอาคาร','🔒 Only e-mails added by an admin can sign in · no access yet → contact your admin / FM');
+/* login form: allow-list note */
+{const _f0=otpFormHTML;otpFormHTML=function(H){let s=_f0(H);if(H.tab==='otp'&&OTS.step===1&&!OTS.flags.signup)s=s.replace(/<\/form>$/,`<div class="${H.hint}" style="margin-top:2px">${WP_INV_NOTE()}</div></form>`);return s}}
+/* desktop: hide “ขอสิทธิ์ใช้งาน” (and Admin-password when locked) */
+if(!IS_MOB&&typeof lgRender==='function'){const _l0=lgRender;let asked=false;
+  lgRender=function(){if(!asked){asked=true;wpAuthFlags().then(()=>{if(!me())lgRender()})}
+    if(LG.tab==='otpreg'&&!OTS.flags.signup)LG.tab='otp';if(LG.tab==='login'&&!OTS.flags.adminPw)LG.tab='otp';
+    _l0();const el=document.getElementById('lg-body');if(!el)return;
+    el.querySelectorAll('.lg-tabs button').forEach(b=>{const oc=b.getAttribute('onclick')||'';if((!OTS.flags.signup&&oc.includes("'otpreg'"))||(!OTS.flags.adminPw&&oc.includes("'login'")))b.remove()});
+    const t=el.querySelector('.lg-tabs');if(t&&t.children.length<2)t.style.display='none'}}
+/* mobile */
+if(IS_MOB&&typeof screenLogin==='function'){const _s0=screenLogin;let asked=false;
+  screenLogin=function(){if(!asked){asked=true;wpAuthFlags().then(()=>{if(!ST.user)render()})}
+    if(LGM.tab==='otpreg'&&!OTS.flags.signup)LGM.tab='otp';if(LGM.tab==='login'&&!OTS.flags.adminPw)LGM.tab='otp';
+    let s=_s0();
+    if(!OTS.flags.signup)s=s.replace(/<button class="seg-opt[^"]*"[^>]*LGM\.tab='otpreg'[^>]*>[\s\S]*?<\/button>/,'');
+    if(!OTS.flags.adminPw)s=s.replace(/<button class="seg-opt[^"]*"[^>]*LGM\.tab='login'[^>]*>[\s\S]*?<\/button>/,'');
+    return s}}
+/* demo (no server): same rules as Code.gs V2.1 */
+{const _la=localApi;localApi=function(action,q){q=q||{};
+  if((action==='otpSignup'||action==='signup'||(action==='otpReq'&&q.purpose==='signup'))&&!OTS.flags.signup)lFail(_t('ระบบนี้ใช้ได้เฉพาะอีเมลที่ Admin เพิ่มสิทธิ์ไว้แล้ว — กรุณาติดต่อ Admin','Invite-only — contact your admin'));
+  if(action==='otpReq'){const e=normU(q.email);if(!wpEmailOk(e))lFail(_t('ใช้ได้เฉพาะอีเมล @','Only @')+WP_DOMAIN);const u=wpDemoUsers().find(x=>normU(x.email)===e);
+    if(!u||u.status!=='active')return{ok:true,sent:true,message:_t('ถ้าอีเมลนี้ได้รับสิทธิ์ใช้งาน ระบบได้ส่งรหัส 6 หลักไปแล้ว · ไม่ได้รับ → ติดต่อ Admin','If this e-mail has access, a code was sent · none? contact your admin')+_t(' (🧪 สาธิต: อีเมลนี้ยังไม่มีสิทธิ์)',' (🧪 demo: no access)')}}
+  if(action==='userSave'){const d=Object.assign({},q.user||{});
+    if(!d.username&&d.email){const e=normU(d.email);if(!wpEmailOk(e))lFail(_t('ใช้ได้เฉพาะอีเมล @','Only @')+WP_DOMAIN);const L=lUsers();if(L.some(u=>normU(u.email)===e))lFail(_t('อีเมลนี้มีบัญชีอยู่แล้ว','E-mail already has an account'));
+      const m=me()||{};if(m.role!=='admin')lFail(_t('เฉพาะ Admin เท่านั้นที่เพิ่มผู้ใช้ใหม่ได้','Admin only'));
+      const b=e.split('@')[0].replace(/[^a-z0-9._-]/g,'').slice(0,28)||'user';let un=b.length<3?b+'usr':b;while(L.some(u=>u.username===un))un=b.slice(0,26)+Math.floor(Math.random()*90+10);
+      d.username=un;q=Object.assign({},q,{user:d,password:q.password||randPw()})}
+    else if(!q.password&&!lUsers().some(u=>u.username===normU(d.username)))q=Object.assign({},q,{password:randPw()})}
+  return _la(action,q)}}
+
+/* Users & Roles: add by e-mail only + bulk add */
+{const _b0=usrBody;usrBody=function(){let s=_b0();const m=me();if(!m||!USR.list)return s;
+  s=s.replace(`<button class="bcs-btn bcs-pri" onclick="usrEdit(null)">＋ ${_t('เพิ่มผู้ใช้','Add user')}</button>`,
+    m.role==='admin'?`<button class="bcs-btn bcs-pri" onclick="usrEdit(null)">＋ ${_t('เพิ่มผู้ใช้ (อีเมล)','Add user (e-mail)')}</button><button class="bcs-btn" onclick="usrBulk()">📋 ${_t('เพิ่มหลายอีเมล','Add many e-mails')}</button>`:'');
+  return s.replace(/<div class="au-note">/,`<div class="au-note wp-inv">🔒 <b>${_t('ระบบเชิญเท่านั้น (Invite-only)','Invite-only')}</b> — ${_t('Admin เพิ่มอีเมล @','Admins add @')}${WP_DOMAIN} ${_t('+ กำหนดอาคาร / Module ก่อน → ผู้ใช้ได้รับอีเมลแจ้งสิทธิ์ → เข้าสู่ระบบด้วยอีเมล + รหัส OTP 6 หลัก (ไม่มีรหัสผ่าน) · ระงับ / ลบ = ตัดสิทธิ์ทุกเครื่องทันที','e-mails + buildings / modules first → user gets an invite e-mail → signs in with e-mail + 6-digit OTP (no password) · disable / delete = cut off every device immediately')}</div><div class="au-note">`)}}
+{const _e0=usrEdit;usrEdit=function(un,ap){_e0(un,ap);if(USR.ed&&un){const u=(USR.list||[]).find(x=>x.username===un);USR.ed.position=(u&&u.position)||'';usrEdRender()}if(USR.ed&&USR.ed.isNew&&me().role!=='admin'){usrEdClose();AUTH.host.toast&&AUTH.host.toast(_t('เฉพาะ Admin เท่านั้นที่เพิ่มผู้ใช้ใหม่ได้','Admin only'))}}}
+{const _r0=usrEdRender;usrEdRender=function(){_r0();const E=USR.ed,el=document.getElementById('usr-ed');if(!E||!el)return;
+  const field=sel=>{const i=el.querySelector(sel);return i&&i.closest('label.ms-f')};
+  const fu=field('input[oninput="USR.ed.username=this.value"]');if(fu&&E.isNew)fu.remove();
+  const fe=field('input[oninput="USR.ed.email=this.value"]');if(fe){const sp=fe.querySelector('span');if(sp)sp.textContent=_t('อีเมลบริษัท * (ใช้เข้าสู่ระบบ / รับรหัส OTP)','Company e-mail * (sign-in / OTP)');const i=fe.querySelector('input');if(i){i.placeholder='name@'+WP_DOMAIN;if(!E.isNew)i.disabled=me().role!=='admin'}}
+  const fp=field('#usr-pw');if(fp&&E.role!=='admin')fp.remove();else if(fp){const sp=fp.querySelector('span');if(sp)sp.textContent=_t('รหัสผ่านสำรอง Admin (ไม่บังคับ)','Admin fallback password (optional)')}
+  const g=el.querySelector('.ms-grid');if(g&&!el.querySelector('.wp-inv-hd'))g.insertAdjacentHTML('beforebegin',`<div class="au-note wp-inv wp-inv-hd">📧 ${E.isNew?_t('ใส่อีเมล @'+WP_DOMAIN+' แล้วกำหนดบทบาท / อาคาร / Module → กดบันทึก ระบบส่งอีเมลแจ้งสิทธิ์ให้ผู้ใช้อัตโนมัติ (Username สร้างจากอีเมล)','Enter the @'+WP_DOMAIN+' e-mail, set role / buildings / modules → save; the user is e-mailed automatically'):_t('ผู้ใช้เข้าสู่ระบบด้วยอีเมลนี้ + รหัส OTP · ตั้งสถานะ “ระงับ” = ตัดสิทธิ์ทุกเครื่องทันที','User signs in with this e-mail + OTP · “Disabled” cuts off every device immediately')}</div>`);
+  const pos=E.position||'';if(E.role!=='admin'&&!el.querySelector('.wp-pos')){const fr=field('select[onchange^="USR.ed.role"]');if(fr)fr.insertAdjacentHTML('afterend',`<label class="ms-f wp-pos"><span>${_t('ตำแหน่ง (เลือกแล้วติ๊ก Module ให้อัตโนมัติ)','Position (auto-ticks modules)')}</span><select class="bcs-in au-w" onchange="usrPos(this.value)"><option value="">—</option>${WP_POS.map(p=>`<option value="${p[0]}" ${pos===p[0]?'selected':''}>${esc(_t(p[1],p[2]))}</option>`).join('')}</select></label>`)}}}
+function usrPos(p){const E=USR.ed,x=WP_POS.find(z=>z[0]===p);E.position=p;if(!x){usrEdRender();return}E.role=WP_POS_ROLE[p]||E.role;if(x[3]==='*'){E.svcAll=true;E.svcs=[]}else if(x[3]){E.svcAll=false;E.svcs=[x[3]]}else{E.svcAll=true}usrEdRender()}
+usrSave=async function(){const E=USR.ed;if(!E)return;E.err='';const m=me();
+  const access=E.role==='admin'?'*':E.acc.all?'*':Object.entries(E.acc.biz).filter(([b,o])=>o.on).flatMap(([b,o])=>{const full=m.role==='admin'||accOf(m).includes('*')||accOf(m).includes(b+':*');return o.all&&full?[b+':*']:o.sites.map(s=>b+':'+s)}).join(',');
+  const em=normU(E.email);
+  if(!String(E.name).trim())E.err=_t('กรุณาระบุชื่อ','Enter a name');
+  else if(E.isNew&&!wpEmailOk(em))E.err=_t('ใช้ได้เฉพาะอีเมล @','Only @')+WP_DOMAIN;
+  else if(E.pw&&String(E.pw).length<8)E.err=_t('รหัสผ่านสำรองอย่างน้อย 8 ตัว','Fallback password needs 8+ characters');
+  else if(E.role!=='admin'&&!access)E.err=_t('เลือกอาคารอย่างน้อย 1 แห่ง','Pick at least one building');
+  else if(!E.svcAll&&!E.svcs.length)E.err=_t('เลือก Module อย่างน้อย 1 รายการ','Pick at least one module');
+  if(E.err){usrEdRender();return}
+  const b=document.getElementById('usr-save');if(b){b.disabled=true;b.textContent=_t('กำลังบันทึก…','Saving…')}
+  try{const user={name:E.name,email:em,phone:E.phone,note:E.note,access,services:E.svcAll?'*':E.svcs.join(',')};if(!E.isNew)user.username=E.username;if(E.position)user.position=E.position;if(!E.self){user.role=E.role;user.status=E.status}
+    const j=await api('userSave',{user,password:(E.role==='admin'&&E.pw)||undefined});usrEdClose();
+    AUTH.host.toast&&AUTH.host.toast('✅ '+(E.isNew?_t('เพิ่ม ','Added ')+em+_t(' · ส่งอีเมลแจ้งสิทธิ์แล้ว',' · invite e-mailed'):_t('บันทึก ','Saved ')+((j.user||{}).username||E.username)));if(E.self)authRefresh();usrLoad()}
+  catch(e){E.err=e.message;usrEdRender();if(e.auth)authExpired(e.message)}};
+/* bulk add */
+const UB={txt:'',pos:'tech_eng',sites:['SLS'],busy:false,log:[]};
+function usrBulk(){UB.log=[];UB.busy=false;usrBulkRender()}
+function usrBulkClose(){const e=document.getElementById('usr-bulk');if(e)e.remove()}
+function usrBulkParse(){return UB.txt.split(/\n+/).map(l=>l.trim()).filter(Boolean).map(l=>{const p=l.split(/[,;\t]+/).map(x=>x.trim());const e=normU(p.find(x=>x.includes('@'))||'');const n=p.filter(x=>!x.includes('@')).join(' ').trim();return{email:e,name:n||e.split('@')[0],ok:wpEmailOk(e)}})}
+function usrBulkRender(){let el=document.getElementById('usr-bulk');if(!el){el=document.createElement('div');el.id='usr-bulk';el.className='bcs-modal';document.body.appendChild(el)}
+  const P=usrBulkParse(),bad=P.filter(x=>!x.ok).length,BL=wpReg();
+  el.innerHTML=`<div class="bcs-mbox" style="width:720px"><div class="bcs-mh"><div><div class="bcs-muted">${_t('Invite-only','Invite-only')}</div><div class="bcs-st" style="font-size:20px">📋 ${_t('เพิ่มผู้ใช้หลายอีเมล','Add many users')}</div></div><button class="bcs-btn" onclick="usrBulkClose()">✕</button></div>
+   <label class="ms-f"><span>${_t('อีเมล 1 บรรทัดต่อ 1 คน — ใส่ชื่อตามหลังได้ เช่น','One per line — optional name, e.g.')} <code>somchai.k@${WP_DOMAIN}, สมชาย ใจดี</code> ${_t('(วางจาก Excel ได้)','(paste from Excel)')}</span><textarea class="bcs-in au-w" rows="7" ${UB.busy?'disabled':''} oninput="UB.txt=this.value;clearTimeout(UB.t);UB.t=setTimeout(usrBulkRender,500)">${esc(UB.txt)}</textarea></label>
+   <div class="bcs-muted">${P.length} ${_t('รายการ','entries')}${bad?` · <b style="color:#F87171">${bad} ${_t('อีเมลไม่ใช่ @','not @')}${WP_DOMAIN}</b>`:''}</div>
+   <div class="ms-grid"><label class="ms-f"><span>${_t('ตำแหน่ง (บทบาท + Module)','Position (role + modules)')}</span><select class="bcs-in au-w" onchange="UB.pos=this.value">${WP_POS.map(p=>`<option value="${p[0]}" ${UB.pos===p[0]?'selected':''}>${esc(_t(p[1],p[2]))}</option>`).join('')}</select></label>
+   <div class="ms-f"><span>${_t('อาคาร','Buildings')}</span><div class="au-chips">${BL.map(b=>`<label class="au-ck sm"><input type="checkbox" ${UB.sites.includes(b.code)?'checked':''} onchange="UB.sites=UB.sites.filter(x=>x!=='${esc(b.code)}');if(this.checked)UB.sites.push('${esc(b.code)}')"> ${esc(b.code)}</label>`).join('')}</div></div></div>
+   ${UB.log.length?`<div class="au-note" style="max-height:160px;overflow:auto">${UB.log.map(x=>`<div>${x}</div>`).join('')}</div>`:''}
+   <div class="ms-foot"><button class="bcs-btn" onclick="usrBulkClose();usrLoad()">${_t('ปิด','Close')}</button><button class="bcs-btn bcs-pri" ${UB.busy||!P.length?'disabled':''} onclick="usrBulkGo()">📧 ${_t('เพิ่ม + ส่งอีเมลแจ้งสิทธิ์','Add + e-mail invites')} (${P.filter(x=>x.ok).length})</button></div></div>`}
+async function usrBulkGo(){const P=usrBulkParse().filter(x=>x.ok);if(!UB.sites.length){UB.log=['❌ '+_t('เลือกอาคารอย่างน้อย 1 แห่ง','Pick a building')];usrBulkRender();return}
+  const x=WP_POS.find(z=>z[0]===UB.pos)||WP_POS[0],role=WP_POS_ROLE[x[0]]||'tech',svc=x[3]==='*'||!x[3]?'*':x[3];UB.busy=true;UB.log=[];usrBulkRender();
+  for(const p of P){try{await api('userSave',{user:{email:p.email,name:p.name,role,position:x[0],access:UB.sites.map(s=>'workplace:'+s).join(','),services:svc,status:'active'}});UB.log.push('✅ '+esc(p.email))}catch(e){UB.log.push('❌ '+esc(p.email)+' — '+esc(e.message))}usrBulkRender()}
+  UB.busy=false;UB.txt='';usrBulkRender();usrLoad()}
+
 /* ───────── 7. Schema, menus, host integration ───────── */
 SCH.iotDev={label:'อุปกรณ์ IoT',pfx:'IOT',fields:[
   {k:'name',l:'ชื่ออุปกรณ์',t:'text',req:1,full:1},
