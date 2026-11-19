@@ -2455,7 +2455,7 @@ BCS.html=function(kind){BCS.kind=kind;const m=kind==='mob';
   <div class="bcs-layout">
     <div class="bcs-bwrap" id="bcs-bwrap">
       <div class="bcs-bhead"><span class="bcs-cap">🏢 ${bT('อาคาร — แตะชั้นเพื่อดูผัง','Building — tap a floor')}</span>
-        <span class="bcs-modes"><span class="bcs-dots"><i style="color:#22C55E">●</i>${bT('ปกติ','OK')} <i style="color:#EAB308">●</i>${bT('เตือน','Warn')} <i style="color:#EF4444">●</i>${bT('วิกฤต','Crit')}</span>
+        <span class="bcs-modes"><span class="bcs-dots"><i style="color:#22C55E">●</i>${bT('ปกติ','OK')} <i style="color:#3B82F6">●</i>WR <i style="color:#06B6D4">●</i>HARD <i style="color:#A855F7">●</i>PPM <i style="color:#EC4899">●</i>SOFT <i style="color:#EF4444">●</i>${bT('วิกฤต','Crit')}</span>
         ${['3d','3d2','3d3','2d'].map((k,i)=>`<button class="bcs-mb" id="bcs-bm-${k}" onclick="bcsSetBMode('${k}')">${['3D-1','3D-2','3D-3','2D'][i]}</button>`).join('')}</span></div>
       <div class="bcs-3d bcs-b3" id="bcs-b3" hidden>
         <div class="bcs-ctl"><button onclick="b3Pan(3)" title="${bT('ชั้นบน','Up')}">▲</button><button onclick="b3Pan(-3)" title="${bT('ชั้นล่าง','Down')}">▼</button><button onclick="b3Zoom(.8)">＋</button><button onclick="b3Zoom(1.25)">－</button><button onclick="b3Reset()" title="Reset">⟳</button></div>
@@ -3227,9 +3227,9 @@ function wpBlock3D(b,fl,st){
   fs.forEach((f,i)=>{const L=SLS_L[f.id];if(!L)return;const fp=L.fp,s=FW/fp[2],cx=fp[0]+fp[2]/2,cy=fp[1]+fp[3]/2,W=fp[2]*s,Dp=fp[3]*s,y=i*GAP,o=st[f.id]||{},sel=BCS.sel===f.id;maxW=Math.max(maxW,W,Dp);
     const X=px=>(px-cx)*s,Z=py=>(py-cy)*s,rnd=wpRnd(f.id);
     // slab + edge
-    const slabM=new THREE.MeshStandardMaterial({color:F3C(sel?'#2C3A52':'#1E2532'),roughness:.85,emissive:F3C(o.crit?'#DC2626':o.bad?'#EAB308':'#000000'),emissiveIntensity:o.bad?.07:0});
+    const slabM=new THREE.MeshStandardMaterial({color:F3C(sel?'#2C3A52':'#1E2532'),roughness:.85,emissive:F3C(o.crit?'#DC2626':o.bad?bcsColor(o):'#000000'),emissiveIntensity:o.bad?.07:0});
     const slab=new THREE.Mesh(new THREE.BoxGeometry(W+.5,.22,Dp+.5),slabM);slab.position.set(0,y-.11,0);slab.userData.fid=f.id;g.add(slab);B3.pick.push(slab);
-    const edge=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(W+.5,.22,Dp+.5)),new THREE.LineBasicMaterial({color:sel?0xF97316:o.crit?0xEF4444:o.bad?0xEAB308:0x3B4658}));edge.position.copy(slab.position);g.add(edge);
+    const edge=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(W+.5,.22,Dp+.5)),new THREE.LineBasicMaterial({color:sel?0xF97316:o.crit?0xEF4444:o.bad?F3C(bcsColor(o)).getHex():0x3B4658}));edge.position.copy(slab.position);g.add(edge);
     // low perimeter wall
     const wm=new THREE.MeshStandardMaterial({color:F3C('#3A4456'),roughness:.8,transparent:true,opacity:.9});
     [[W+.5,.32,.08,0,(Dp+.5)/2],[W+.5,.32,.08,0,-(Dp+.5)/2],[.08,.32,Dp+.5,(W+.5)/2,0],[.08,.32,Dp+.5,-(W+.5)/2,0]].forEach(q=>{const m=new THREE.Mesh(new THREE.BoxGeometry(q[0],q[1],q[2]),wm);m.position.set(q[3],y+.16,q[4]);g.add(m)});
@@ -3283,7 +3283,7 @@ function wpMiniMount(id){const host=B3.el;if(!host)return;let m=host.querySelect
   if(!m){m=document.createElement('div');m.className='wp-mini';host.appendChild(m)}
   const b=D.bldg.blocks.find(x=>x.id===id),S=wpBlkStatus(id),st=WPV.stat||{};
   m.innerHTML=`<div class="wp-mini-h"><b>🏢 ${esc(id)}</b><small>${b&&b.type==='carpark'?_t('อาคารจอดรถ','Car park'):_t('อาคารสำนักงาน','Office')} · ${S.n} ${_t('ชั้น','floors')}</small><button onclick="wpBlkSet(null)" title="${_t('กลับไปดูทั้งแคมปัส','Back to campus')}">🏙 ${_t('ทั้งหมด','All')}</button></div><div class="wp-mini-c" id="wp-mini-c"></div>
-  <div class="wp-mini-l"><i style="color:#22C55E">●</i>OK <i style="color:#EAB308">●</i>Warn <i style="color:#EF4444">●</i>Crit · ${b&&b.type==='carpark'?'🚗 '+(st.cars||0)+_t(' คัน',' cars'):'👥 '+(st.ppl||0)+_t(' คน',' people')} <span class="wp-demo">DEMO</span></div>`;
+  <div class="wp-mini-l"><i style="color:#22C55E">●</i>OK <i style="color:#3B82F6">●</i>WR <i style="color:#06B6D4">●</i>HARD <i style="color:#A855F7">●</i>PPM <i style="color:#EC4899">●</i>SOFT <i style="color:#EF4444">●</i>Crit · ${b&&b.type==='carpark'?'🚗 '+(st.cars||0)+_t(' คัน',' cars'):'👥 '+(st.ppl||0)+_t(' คน',' people')} <span class="wp-demo">DEMO</span></div>`;
   const c=m.querySelector('#wp-mini-c');if(!c)return;
   if(!WPV.m3){try{const r=new THREE.WebGLRenderer({antialias:true,alpha:true});r.outputEncoding=THREE.sRGBEncoding;r.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
     const sc=new THREE.Scene();sc.add(new THREE.HemisphereLight(0xffffff,0x6b7a90,1));const dl=new THREE.DirectionalLight(0xffffff,.7);dl.position.set(20,40,15);sc.add(dl);
@@ -3321,7 +3321,7 @@ function wpFlCard(){const host=B3.el;if(!host)return;let c=host.querySelector('.
   if(!c){c=document.createElement('div');c.className='wp-flcard';host.appendChild(c)}
   const f=bcsFloorById(fid),o=(BCS.st||{})[fid]||{n:0,items:[]},LB={r1:'WR',r2:'HARD',r3:'PPM',r4:'SOFT'},bad=o.items.filter(x=>x.rs.bad);
   const AC={r1:'#3B82F6',r2:'#06B6D4',r3:'#A855F7',r4:'#EC4899'},ring=k=>`<span class="wp-ring ${o[k]?'bad':''}" ${o[k]?`style="background:${AC[k]};border-color:${AC[k]};color:#fff"`:''}>${LB[k]} ${o[k]?o[k]:'OK'}</span>`;
-  c.innerHTML=`<div class="wp-flc-h"><b>${esc(f.name)}</b><span class="wp-flc-st" style="background:${bcsColor(o)}">${o.crit?_t('วิกฤต','Critical'):o.bad?_t('เตือน','Warning'):_t('ปกติ','Normal')}</span><button onclick="bcsHidePanel()" title="${_t('ปิด','Close')}">✕</button></div>
+  c.innerHTML=`<div class="wp-flc-h"><b>${esc(f.name)}</b><span class="wp-flc-st" style="background:${bcsColor(o)};color:#fff">${o.crit?'⚠ '+_t('วิกฤต','Critical'):o.bad?wpActLbl(o):_t('ปกติ','Normal')}</span><button onclick="bcsHidePanel()" title="${_t('ปิด','Close')}">✕</button></div>
   <div class="wp-flc-r">${['r1','r2','r3','r4'].map(ring).join('')}<small>${o.n} ${_t('พื้นที่','areas')}</small></div>
   <div class="wp-flc-l">${bad.length?bad.slice(0,6).map(x=>`<div><b style="color:${x.rs.crit?'#EF4444':(wpAct(x.rs)||{c:'#EAB308'}).c}">●</b> ${esc(x.a.name)} <small>${['r1','r2','r3','r4'].filter(k=>x.rs[k].bad).map(k=>LB[k]+(x.rs[k].n?' · '+esc(String(x.rs[k].n).slice(0,40)):'')).join(' / ')}</small></div>`).join('')+(bad.length>6?`<small>+${bad.length-6} ${_t('พื้นที่','more')}</small>`:''):`<div>✅ ${_t('ทุกพื้นที่ในชั้นนี้ปกติ','All areas normal')}</div>`}</div>
   <div class="wp-flc-b"><button class="wp-pri" onclick="showView('bcs')">🗂 ${_t('ผังละเอียด (หลังบ้าน)','Detailed plan (back office)')}</button>${cap('e')||cap('wr')?`<button onclick="quickWR()">＋ ${_t('แจ้งงาน','New WR')}</button>`:''}</div>`}
@@ -3331,7 +3331,7 @@ function wpBlockSolid(b,fl,st,g){const car=b.type==='carpark',FW=car?17:12.5,FH=
   const fs=fl.filter(f=>(f.blk||(SLS_L[f.id]||{}).blk)===b.id).sort((a,c)=>wpLv(a.id)-wpLv(c.id));let maxW=0;
   const gr=new THREE.Mesh(new THREE.BoxGeometry(FW*1.9,.25,FW*1.6),new THREE.MeshStandardMaterial({color:F3C('#1B222C'),roughness:.95}));gr.position.y=-.13;g.add(gr);
   fs.forEach((f,i)=>{const L=SLS_L[f.id];if(!L)return;const fp=L.fp,W=FW,Dp=FW*fp[3]/fp[2],y=i*FH,o=st[f.id]||{},sel=BCS.sel===f.id;maxW=Math.max(maxW,W,Dp);
-    const col=o.crit?'#DC2626':o.bad?'#EAB308':(car?'#64748B':'#1FA971');
+    const col=o.crit?'#DC2626':o.bad?bcsColor(o):(car?'#64748B':'#1FA971');
     const mat=new THREE.MeshStandardMaterial({color:F3C(col),roughness:.35,metalness:.25,emissive:F3C(col),emissiveIntensity:.06});
     const slabM=new THREE.MeshStandardMaterial({color:F3C(sel?'#FFFFFF':'#E5E7EB'),roughness:.6});
     (L.grid&&L.grid.length?L.grid:[[0,0,1,1]]).forEach(q=>{const w=q[2]*W,d=q[3]*Dp,x=(q[0]+q[2]/2-.5)*W,z=(q[1]+q[3]/2-.5)*Dp;
@@ -3352,7 +3352,14 @@ function wpBlockSolid(b,fl,st,g){const car=b.type==='carpark',FW=car?17:12.5,FH=
   if(BCS.sel){const i=fs.findIndex(f=>f.id===BCS.sel);if(i>=0)B3.tcy=i*FH+FH/2}else B3.tcy=H/2;B3.lastSel=BCS.sel;
   wpMiniMount(b.id);wpFlCard();return true}
 /* severity: เตือน = เหลือง · วิกฤต = แดง (ส้มใช้เป็นสีเลือก/แบรนด์เท่านั้น) */
-bcsColor=function(o){return!o?'#16A34A':o.crit?'#DC2626':o.bad?'#EAB308':'#16A34A'};
+/* เตือน = สีตามกิจกรรม (WR ฟ้า · HARD เขียวน้ำทะเล · PPM ม่วง · SOFT ชมพู) · วิกฤต = แดง */
+const WP_AK=['r1','r2','r3','r4'],WP_AC={r1:'#3B82F6',r2:'#06B6D4',r3:'#A855F7',r4:'#EC4899'},WP_AN={r1:'🛠 WR',r2:'⚙ HARD',r3:'🗓 PPM',r4:'🧹 SOFT'};
+function wpActOf(c){return c?WP_AK.find(k=>+c[k]>0)||null:null}
+function wpActCol(c){const k=wpActOf(c);return k?WP_AC[k]:'#EAB308'}
+function wpActLbl(c){const L=WP_AK.filter(k=>+(c||{})[k]>0);return L.length?L.map(k=>WP_AN[k]).join(' · '):_t('เตือน','Warning')}
+bcsColor=function(o){return!o?'#16A34A':o.crit?'#DC2626':o.bad?wpActCol(o):'#16A34A'};
+wpBlkStatus=function(id){const st=BCS.st||{},fs=bcsFloors().filter(f=>f.blk===id);let bad=0,crit=0;const cnt={r1:0,r2:0,r3:0,r4:0};
+  fs.forEach(f=>{const o=st[f.id];if(!o)return;if(o.crit)crit++;else if(o.bad){bad++;WP_AK.forEach(k=>cnt[k]+=+o[k]||0)}});return{bad,crit,n:fs.length,cnt,col:crit?'#DC2626':bad?wpActCol(cnt):'#16A34A'}};
 {const _bd=b3Dispose;b3Dispose=function(){_bd.apply(this,arguments);const l=B3.el&&B3.el.querySelector('.wp-actl');if(l)l.remove()}}
 
 /* ───────── 1b. Workplace building registry (SLS · BTB · BTE · CLS · UBC-II + Add Building) ───────── */
@@ -3537,6 +3544,7 @@ function wpPeople(g,pts,rnd,box,blocks){const C=['#3B82F6','#F97316','#EC4899','
       w.ph+=dt*w.v*7;const a=Math.sin(w.ph)*.55;p.userData.legs[0].rotation.x=a;p.userData.legs[1].rotation.x=-a;p.userData.arms[0].rotation.x=-a*.8;p.userData.arms[1].rotation.x=a*.8;p.position.y=.27+Math.abs(Math.sin(w.ph))*.03})};requestAnimationFrame(tick)}}
 function wpInBlk(x,z){return WPW.blocks.some(b=>Math.abs(x-b.x)<b.w/2+.35&&Math.abs(z-b.z)<b.d/2+.35)}
 function wpCross(x0,z0,x1,z1){for(let i=1;i<10;i++){const t=i/10;if(wpInBlk(x0+(x1-x0)*t,z0+(z1-z0)*t))return true}return false}
+function wpMix(c){const n=parseInt(c.slice(1),16),m=v=>Math.round(v+(255-v)*.55);return'#'+[n>>16&255,n>>8&255,n&255].map(v=>m(v).toString(16).padStart(2,'0')).join('')}
 const WP_STC={ok:'#22C55E',warn:'#EAB308',crit:'#EF4444',off:'#94A3B8'};
 function wpCampusLight(fl,st){const P=wpPal();
   if(!window.THREE||!b3Init())return false;b3Dispose();
@@ -3552,14 +3560,14 @@ function wpCampusLight(fl,st){const P=wpPal();
   const TINT={ok:'#F1F4F8',warn:'#FFC9A0',crit:'#FFA8A8'};let top=0;const fy={};
   blocks.forEach(b=>{const fs=(byB[b.id]||[]).slice().sort((a,c)=>wpLv(a.id)-wpLv(c.id)),car=b.type==='carpark',FH=car?.62:1.05,tex=car?fac.car:fac.office,G=wpGrpOf(b.id),dim=!!(WPV.grp&&G&&G.id!==WPV.grp),cM=dim?new THREE.MeshStandardMaterial({color:F3C('#F8FAFC'),transparent:true,opacity:.3,depthWrite:false}):capM;let nb=0,nc=0;
     fs.forEach((f,i)=>{const o=st[f.id]||{},lv=o.crit?'crit':o.bad?'warn':'ok';if(o.crit)nc++;else if(o.bad)nb++;
-      const side=new THREE.MeshStandardMaterial({map:tex,color:F3C(TINT[lv]),roughness:.55,metalness:.05,emissive:F3C(lv==='ok'?'#000000':lv==='crit'?'#EF4444':'#EAB308'),emissiveIntensity:0,transparent:dim,opacity:dim?.3:1,depthWrite:!dim}),mats=[side,side,cM,cM,side,side];
+      const side=new THREE.MeshStandardMaterial({map:tex,color:F3C(lv==='warn'?wpMix(bcsColor(o)):TINT[lv]),roughness:.55,metalness:.05,emissive:F3C(lv==='ok'?'#000000':lv==='crit'?'#EF4444':bcsColor(o)),emissiveIntensity:0,transparent:dim,opacity:dim?.3:1,depthWrite:!dim}),mats=[side,side,cM,cM,side,side];
       const y=base+i*FH;
       const m=new THREE.Mesh(wpBoxUV(b.w,FH,b.d,car?1.6:1.1,FH),mats);m.position.set(b.x,y+FH/2,b.z);m.userData.fid='blk:'+b.id;g.add(m);B3.pick.push(m);
       fy[f.id]={y:y+FH/2,b}});
     const H=base+fs.length*FH;top=Math.max(top,H);
     const rf=new THREE.Mesh(new THREE.BoxGeometry(b.w*.97,.08,b.d*.97),cM);rf.position.set(b.x,H+.04,b.z);g.add(rf);
     const ru=new THREE.Mesh(new THREE.BoxGeometry(b.w*.34,.32,b.d*.3),new THREE.MeshStandardMaterial({color:F3C('#CBD5E1'),roughness:.5}));ru.position.set(b.x+b.w*.12,H+.2,b.z-b.d*.1);g.add(ru);
-    const sc=nc?WP_STC.crit:nb?WP_STC.warn:WP_STC.ok,dt=new THREE.Mesh(new THREE.SphereGeometry(.14,12,10),new THREE.MeshBasicMaterial({color:F3C(sc)}));dt.position.set(b.x,H+.45,b.z);g.add(dt);
+    const sc=nc?WP_STC.crit:nb?wpBlkStatus(b.id).col:WP_STC.ok,dt=new THREE.Mesh(new THREE.SphereGeometry(.14,12,10),new THREE.MeshBasicMaterial({color:F3C(sc)}));dt.position.set(b.x,H+.45,b.z);g.add(dt);
     if(WPV.grp&&G&&G.id===WPV.grp&&G.blocks.length>1){const pl=wpPill(b.id,sc,(nb+nc)?'⚠'+(nb+nc):'',.034);pl.position.set(b.x,H+.95,b.z);g.add(pl)}});
   // campus group labels
   WP_GROUPS.forEach(G=>{const bs=blocks.filter(b=>G.blocks.includes(b.id));if(!bs.length)return;if(WPV.grp&&WPV.grp!==G.id)return;const S=wpGrpStatus(G.id),gx=bs.reduce((s,b)=>s+b.x,0)/bs.length,gz=Math.min(...bs.map(b=>b.z-b.d/2)),car=bs[0].type==='carpark';
@@ -3637,7 +3645,7 @@ if(IS_MOB&&typeof applyPrefs==='function'){const _ap=applyPrefs;applyPrefs=funct
 const WP_GROUPS=[{id:'CA',name:'Campus A',ic:'🏢',blocks:['A1','A2','A3','A4','A5','A6']},{id:'CB',name:'Campus B',ic:'🏢',blocks:['B1','B2','B3','B4','B5','B6']},{id:'CC',name:'Campus C',ic:'🏢',blocks:['C1','C5','C6']},{id:'P1',name:'Carpark P1',ic:'🅿',blocks:['P1']},{id:'P2',name:'Carpark P2',ic:'🅿',blocks:['P2']}];
 WPV.grp=(typeof bLS==='function'?bLS('wp_grp_'+BIZK,''):'')||null;
 function wpGrpOf(blk){return WP_GROUPS.find(G=>G.blocks.includes(blk))||null}
-function wpGrpStatus(id){const G=WP_GROUPS.find(x=>x.id===id);let bad=0,crit=0,n=0;(G?G.blocks:[]).forEach(k=>{const S=wpBlkStatus(k);bad+=S.bad;crit+=S.crit;n+=S.bad+S.crit});return{bad,crit,n,col:crit?'#EF4444':bad?'#EAB308':'#22C55E'}}
+function wpGrpStatus(id){const G=WP_GROUPS.find(x=>x.id===id);let bad=0,crit=0,n=0;const cnt={r1:0,r2:0,r3:0,r4:0};(G?G.blocks:[]).forEach(k=>{const S=wpBlkStatus(k);bad+=S.bad;crit+=S.crit;n+=S.bad+S.crit;if(S.cnt)WP_AK.forEach(q=>cnt[q]+=S.cnt[q])});return{bad,crit,n,cnt,col:crit?'#EF4444':bad?wpActCol(cnt):'#22C55E'}}
 function wpGrpSet(id){const G=WP_GROUPS.find(x=>x.id===id);WPV.grp=G?G.id:null;bLSset('wp_grp_'+BIZK,WPV.grp||'');
   if(G&&G.blocks.length===1){wpBlkSet(G.blocks[0]);return}
   WPV.blk=null;bLSset('wp_blk_'+BIZK,'');if(BCS.sel){BCS.sel=null;bLSset('bcs_sel_'+BIZK,'')}B3.n=null;bcsRefresh()}
@@ -3667,7 +3675,7 @@ function wpFocusGrp(){if(!WPV.grp||WPV.blk||!B3.group)return;const G=WP_GROUPS.f
 wpMiniMount=function(id){const host=B3.el;if(!host)return;let m=host.querySelector('.wp-mini');if(!m){m=document.createElement('div');m.className='wp-mini';host.appendChild(m)}
   const G=wpGrpOf(id)||{id:'',name:id,ic:'🏢',blocks:[id]},b=D.bldg.blocks.find(x=>x.id===id),S=wpBlkStatus(id),st=WPV.stat||{},multi=G.blocks.length>1;
   m.innerHTML=`<div class="wp-mini-h"><b>${G.ic} ${multi?esc(id):esc(G.name)}</b><small>${multi?esc(G.name)+' · ':''}${S.n} ${_t('ชั้น','floors')}</small>${multi?`<button onclick="wpGrpSet('${G.id}')" title="${_t('กลับไป ','Back to ')}${esc(G.name)}">↩</button>`:''}<button onclick="wpBlkSet(null)" title="${_t('ทั้งแคมปัส','Whole campus')}">🏙</button></div><div class="wp-mini-c" id="wp-mini-c"></div>
-  <div class="wp-mini-l"><i style="color:#22C55E">●</i>OK <i style="color:#EAB308">●</i>Warn <i style="color:#EF4444">●</i>Crit · ${b&&b.type==='carpark'?'🚗 '+(st.cars||0)+_t(' คัน',' cars'):'👥 '+(st.ppl||0)+_t(' คน',' people')} <span class="wp-demo">DEMO</span></div>`;
+  <div class="wp-mini-l"><i style="color:#22C55E">●</i>OK <i style="color:#3B82F6">●</i>WR <i style="color:#06B6D4">●</i>HARD <i style="color:#A855F7">●</i>PPM <i style="color:#EC4899">●</i>SOFT <i style="color:#EF4444">●</i>Crit · ${b&&b.type==='carpark'?'🚗 '+(st.cars||0)+_t(' คัน',' cars'):'👥 '+(st.ppl||0)+_t(' คน',' people')} <span class="wp-demo">DEMO</span></div>`;
   const c=m.querySelector('#wp-mini-c');if(!c)return;
   if(!WPV.m3){try{const r=new THREE.WebGLRenderer({antialias:true,alpha:true});r.outputEncoding=THREE.sRGBEncoding;r.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
     const sc=new THREE.Scene();sc.add(new THREE.HemisphereLight(0xffffff,0x6b7a90,1));const dl=new THREE.DirectionalLight(0xffffff,.7);dl.position.set(20,40,15);sc.add(dl);
@@ -3681,7 +3689,7 @@ wpMiniMount=function(id){const host=B3.el;if(!host)return;let m=host.querySelect
   const x0=Math.min(...bs.map(k=>k.x-k.w/2)),x1=Math.max(...bs.map(k=>k.x+k.w/2)),z0=Math.min(...bs.map(k=>k.z-k.d/2)),z1=Math.max(...bs.map(k=>k.z+k.d/2));
   const gr=new THREE.Mesh(new THREE.BoxGeometry(x1-x0+4,.2,z1-z0+4),new THREE.MeshStandardMaterial({color:F3C('#475569'),roughness:.9}));gr.position.set((x0+x1)/2,-.1,(z0+z1)/2);g.add(gr);let top=0;
   bs.forEach(k=>{const fs=bcsFloors().filter(f=>f.blk===k.id).sort((a,c)=>wpLv(a.id)-wpLv(c.id)),FH=k.type==='carpark'?.55:1,on=k.id===id;
-    fs.forEach((f,i)=>{const o=stF[f.id]||{},sel=BCS.sel===f.id,col=sel?'#FFFFFF':!on?'#CBD5E1':o.crit?'#EF4444':o.bad?'#EAB308':'#22C55E';
+    fs.forEach((f,i)=>{const o=stF[f.id]||{},sel=BCS.sel===f.id,col=sel?'#FFFFFF':!on?'#CBD5E1':o.crit?'#EF4444':o.bad?bcsColor(o):'#22C55E';
       const mat=new THREE.MeshStandardMaterial({color:F3C(col),roughness:.5,emissive:F3C(sel?'#F97316':'#000000'),emissiveIntensity:sel?.6:0,transparent:!on,opacity:on?1:.5});
       const ms=new THREE.Mesh(new THREE.BoxGeometry(k.w,FH*.9,k.d),mat);ms.position.set(k.x,i*FH+FH*.45,k.z);if(on)ms.userData.fid=f.id;else ms.userData.blk=k.id;g.add(ms);M.pick.push(ms)});
     const H=fs.length*FH;top=Math.max(top,H);
