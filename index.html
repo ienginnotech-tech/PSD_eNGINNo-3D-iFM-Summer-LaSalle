@@ -786,6 +786,15 @@ body.wpf-on #main{margin-left:0!important}body.wpf-on #content{padding:0!importa
 .wpf-modgo{border:1px solid var(--border);background:transparent;color:inherit;border-radius:9px;padding:6px 10px;cursor:pointer;font-size:14px}
 .wpf-modbody>.page-h:first-child,.wpf-modbody>.ph:first-child{margin-top:0}
 .wpf-svc.on{border-color:var(--sc);background:color-mix(in srgb,var(--sc) 16%,var(--bg));box-shadow:inset 0 0 0 1px var(--sc)}
+
+.bcs-kpi.wpk{position:relative}.bcs-kpi.wpk>span{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.wpk-sc{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:none;background:rgba(249,115,22,.15);color:#F97316;border-radius:99px;padding:1px 8px}
+.wpk-br{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
+.wpk-br span{font-size:10.5px;border:1px solid var(--border);border-radius:6px;padding:0 5px;opacity:.65;cursor:pointer;white-space:nowrap}
+.wpk-br span b{font-weight:800}.wpk-br span.hot{opacity:1;border-color:var(--bc);color:var(--bc)}.wpk-br span.on{outline:1px solid #F97316}
+.wpk-br span:hover{opacity:1}
+.bcs-kpi .wpk-br span,.bcs-kpi .wpk-br span b{font-size:10.5px!important;line-height:1.55!important;font-family:inherit!important;margin:0!important;display:inline!important;letter-spacing:0!important}
+.bcs-kpi .wpk-br span{display:inline-block!important;padding:0 6px!important;font-weight:600}
 </style>
 </head>
 <body>
@@ -3337,7 +3346,7 @@ const _wpSel0=bcsSelect;bcsSelect=function(id){id=String(id||'');if(id.indexOf('
 const _wpTip0=bcsTip;bcsTip=function(e,id){if(String(id||'').indexOf('blk:')===0){const k=String(id).slice(4),S=wpBlkStatus(k),b=(D.bldg.blocks||[]).find(x=>x.id===k),t=document.getElementById('bcs-tip');if(!t)return;
   t.innerHTML=`<b>🏢 ${esc(k)}</b> · ${b&&b.type==='carpark'?_t('อาคารจอดรถ','Car park'):_t('อาคารสำนักงาน','Office')}<br>${S.n} ${_t('ชั้น','floors')} · <span style="color:#EAB308">${S.bad} ${_t('เตือน','warn')}</span> · <span style="color:#EF4444">${S.crit} ${_t('วิกฤต','crit')}</span><br><small>${_t('คลิก = เปิดอาคาร / ดูทุกชั้น','click = open building')}</small>`;t.hidden=false;bcsTipMove(e);return}return _wpTip0(e,id)};
 const _wpChips0=bcsChips;bcsChips=function(){if(!(D&&D.bldg&&Array.isArray(D.bldg.blocks)&&D.bldg.blocks.length))return _wpChips0();const el=document.getElementById('bcs-chips');if(!el)return;const st=BCS.st||{};
-  const bk=D.bldg.blocks.map(k=>{const S=wpBlkStatus(k.id),nb=S.bad+S.crit;return`<button class="bcs-chip ${WPV.blk===k.id?'on':''}" style="--fc:${S.col}" onclick="wpBlkSet('${k.id}')" onmouseenter="bcsTip(event,'blk:${k.id}')" onmousemove="bcsTipMove(event)" onmouseleave="bcsTipHide()"><i></i>${k.type==='carpark'?'🅿 ':''}${esc(k.id)}${nb?`<small>${nb}</small>`:''}</button>`}).join('');
+  const bk=D.bldg.blocks.map(k=>{const S=wpBlkStatus(k.id),nb=S.na||0;return`<button class="bcs-chip ${WPV.blk===k.id?'on':''}" style="--fc:${S.col}" onclick="wpBlkSet('${k.id}')" onmouseenter="bcsTip(event,'blk:${k.id}')" onmousemove="bcsTipMove(event)" onmouseleave="bcsTipHide()"><i></i>${k.type==='carpark'?'🅿 ':''}${esc(k.id)}${nb?`<small>${nb}</small>`:''}</button>`}).join('');
   const fls=WPV.blk?bcsFloors().filter(f=>f.blk===WPV.blk).sort((a,c)=>wpLv(c.id)-wpLv(a.id)).map(f=>{const o=st[f.id],nb=o?o.items.filter(x=>x.rs.bad).length:0;return`<button class="bcs-chip wp-flchip ${BCS.sel===f.id?'on':''}" style="--fc:${bcsColor(o)}" onclick="bcsSelect('${f.id}')" onmouseenter="bcsTip(event,'${f.id}')" onmousemove="bcsTipMove(event)" onmouseleave="bcsTipHide()"><i></i>${_t('ชั้น ','Fl ')}${esc(wpFlLabel(f.id))}${nb?`<small>${nb}</small>`:''}</button>`}).join(''):'';
   el.innerHTML=`<button class="bcs-chip wp-allchip ${!WPV.blk?'on':''}" onclick="wpBlkSet(null)">🏙 ${_t('ทั้งแคมปัส','Whole campus')}</button>${bk}${fls?`<span class="wp-chipsep">${esc(WPV.blk)} ›</span>${fls}`:''}`;
   const on=el.querySelector('.wp-flchip.on')||el.querySelector('.bcs-chip.on');if(on&&on.scrollIntoView)try{on.scrollIntoView({block:'nearest',inline:'center'})}catch(e){}};
@@ -3387,7 +3396,7 @@ function wpActCol(c){const k=wpActOf(c);return k?WP_AC[k]:'#EAB308'}
 function wpActLbl(c){const L=WP_AK.filter(k=>+(c||{})[k]>0);return L.length?L.map(k=>WP_AN[k]).join(' · '):_t('เตือน','Warning')}
 bcsColor=function(o){return!o?'#16A34A':o.crit?'#DC2626':o.bad?wpActCol(o):'#16A34A'};
 wpBlkStatus=function(id){const st=BCS.st||{},fs=bcsFloors().filter(f=>f.blk===id);let bad=0,crit=0;const cnt={r1:0,r2:0,r3:0,r4:0};
-  fs.forEach(f=>{const o=st[f.id];if(!o)return;if(o.crit)crit++;else if(o.bad){bad++;WP_AK.forEach(k=>cnt[k]+=+o[k]||0)}});return{bad,crit,n:fs.length,cnt,col:crit?'#DC2626':bad?wpActCol(cnt):'#16A34A'}};
+  let na=0,nca=0;fs.forEach(f=>{const o=st[f.id];if(!o)return;const it=o.items||[];na+=it.filter(x=>x.rs.bad).length;nca+=it.filter(x=>x.rs.crit).length;if(o.crit)crit++;else if(o.bad){bad++;WP_AK.forEach(k=>cnt[k]+=+o[k]||0)}});return{bad,crit,n:fs.length,na,nca,cnt,col:crit?'#DC2626':bad?wpActCol(cnt):'#16A34A'}};
 {const _bd=b3Dispose;b3Dispose=function(){_bd.apply(this,arguments);const l=B3.el&&B3.el.querySelector('.wp-actl');if(l)l.remove()}}
 
 /* ───────── 1b. Workplace building registry (SLS · BTB · BTE · CLS · UBC-II + Add Building) ───────── */
@@ -3596,7 +3605,7 @@ function wpCampusLight(fl,st){const P=wpPal();
     const rf=new THREE.Mesh(new THREE.BoxGeometry(b.w*.97,.08,b.d*.97),cM);rf.position.set(b.x,H+.04,b.z);g.add(rf);
     const ru=new THREE.Mesh(new THREE.BoxGeometry(b.w*.34,.32,b.d*.3),new THREE.MeshStandardMaterial({color:F3C('#CBD5E1'),roughness:.5}));ru.position.set(b.x+b.w*.12,H+.2,b.z-b.d*.1);g.add(ru);
     const sc=nc?WP_STC.crit:nb?wpBlkStatus(b.id).col:WP_STC.ok,dt=new THREE.Mesh(new THREE.SphereGeometry(.14,12,10),new THREE.MeshBasicMaterial({color:F3C(sc)}));dt.position.set(b.x,H+.45,b.z);g.add(dt);
-    if(WPV.grp&&G&&G.id===WPV.grp&&G.blocks.length>1){const pl=wpPill(b.id,sc,(nb+nc)?'⚠'+(nb+nc):'',.034);pl.position.set(b.x,H+.95,b.z);g.add(pl)}});
+    if(WPV.grp&&G&&G.id===WPV.grp&&G.blocks.length>1){const pl=wpPill(b.id,sc,wpBlkStatus(b.id).na?'⚠'+wpBlkStatus(b.id).na:'',.034);pl.position.set(b.x,H+.95,b.z);g.add(pl)}});
   // campus group labels
   WP_GROUPS.forEach(G=>{const bs=blocks.filter(b=>G.blocks.includes(b.id));if(!bs.length)return;if(WPV.grp&&WPV.grp!==G.id)return;const S=wpGrpStatus(G.id),gx=bs.reduce((s,b)=>s+b.x,0)/bs.length,gz=Math.min(...bs.map(b=>b.z-b.d/2)),car=bs[0].type==='carpark';
     const p=wpPill('SLS '+G.name,S.col,S.n?'⚠'+S.n:'',WPV.grp?.04:.042);p.position.set(gx,car?6.6:4.9,car?bs[0].z:gz-.6);g.add(p)});
@@ -3673,7 +3682,7 @@ if(IS_MOB&&typeof applyPrefs==='function'){const _ap=applyPrefs;applyPrefs=funct
 const WP_GROUPS=[{id:'CA',name:'Campus A',ic:'🏢',blocks:['A1','A2','A3','A4','A5','A6']},{id:'CB',name:'Campus B',ic:'🏢',blocks:['B1','B2','B3','B4','B5','B6']},{id:'CC',name:'Campus C',ic:'🏢',blocks:['C1','C5','C6']},{id:'P1',name:'Carpark P1',ic:'🅿',blocks:['P1']},{id:'P2',name:'Carpark P2',ic:'🅿',blocks:['P2']}];
 WPV.grp=(typeof bLS==='function'?bLS('wp_grp_'+BIZK,''):'')||null;
 function wpGrpOf(blk){return WP_GROUPS.find(G=>G.blocks.includes(blk))||null}
-function wpGrpStatus(id){const G=WP_GROUPS.find(x=>x.id===id);let bad=0,crit=0,n=0;const cnt={r1:0,r2:0,r3:0,r4:0};(G?G.blocks:[]).forEach(k=>{const S=wpBlkStatus(k);bad+=S.bad;crit+=S.crit;n+=S.bad+S.crit;if(S.cnt)WP_AK.forEach(q=>cnt[q]+=S.cnt[q])});return{bad,crit,n,cnt,col:crit?'#EF4444':bad?wpActCol(cnt):'#22C55E'}}
+function wpGrpStatus(id){const G=WP_GROUPS.find(x=>x.id===id);let bad=0,crit=0,n=0,nca=0;const cnt={r1:0,r2:0,r3:0,r4:0};(G?G.blocks:[]).forEach(k=>{const S=wpBlkStatus(k);bad+=S.bad;crit+=S.crit;n+=S.na||0;nca+=S.nca||0;if(S.cnt)WP_AK.forEach(q=>cnt[q]+=S.cnt[q])});return{bad,crit,n,na:n,nca,cnt,col:crit?'#EF4444':bad?wpActCol(cnt):'#22C55E'}}
 function wpGrpSet(id){const G=WP_GROUPS.find(x=>x.id===id);WPV.grp=G?G.id:null;bLSset('wp_grp_'+BIZK,WPV.grp||'');
   if(G&&G.blocks.length===1){wpBlkSet(G.blocks[0]);return}
   WPV.blk=null;bLSset('wp_blk_'+BIZK,'');if(BCS.sel){BCS.sel=null;bLSset('bcs_sel_'+BIZK,'')}B3.n=null;bcsRefresh()}
@@ -3689,7 +3698,7 @@ bcsChips=function(){if(!(D&&D.bldg&&Array.isArray(D.bldg.blocks)&&D.bldg.blocks.
   let s=`<button class="bcs-chip wp-allchip ${!WPV.grp?'on':''}" onclick="wpBlkSet(null)">🏙 ${_t('ทั้งแคมปัส','Whole campus')}</button>`;
   s+=WP_GROUPS.map(G=>{const S=wpGrpStatus(G.id);return chip(WPV.grp===G.id,S.col,G.ic+' '+esc(G.name),S.n,`wpGrpSet('${G.id}')`,'grp:'+G.id)}).join('');
   const G=WPV.grp&&WP_GROUPS.find(x=>x.id===WPV.grp);
-  if(G&&G.blocks.length>1){s+=`<span class="wp-chipsep">${esc(G.name)} ›</span>`+G.blocks.map(k=>{const S=wpBlkStatus(k);return chip(WPV.blk===k,S.col,esc(k),S.bad+S.crit,`wpBlkSet('${k}')`,'blk:'+k)}).join('')}
+  if(G&&G.blocks.length>1){s+=`<span class="wp-chipsep">${esc(G.name)} ›</span>`+G.blocks.map(k=>{const S=wpBlkStatus(k);return chip(WPV.blk===k,S.col,esc(k),S.na,`wpBlkSet('${k}')`,'blk:'+k)}).join('')}
   if(WPV.blk){s+=`<span class="wp-chipsep">${esc(WPV.blk)} ›</span>`+bcsFloors().filter(f=>f.blk===WPV.blk).sort((a,c)=>wpLv(c.id)-wpLv(a.id)).map(f=>{const o=st[f.id],nb=o?o.items.filter(x=>x.rs.bad).length:0;return chip(BCS.sel===f.id,bcsColor(o),_t('ชั้น ','Fl ')+esc(wpFlLabel(f.id)),nb,`bcsSelect('${f.id}')`,f.id)}).join('')}
   el.innerHTML=s;const on=el.querySelectorAll('.bcs-chip.on');const last=on[on.length-1];if(last&&last.scrollIntoView)try{last.scrollIntoView({block:'nearest',inline:'center'})}catch(e){}};
 /* focus the camera on the selected main building (campus views) */
@@ -4116,6 +4125,34 @@ function wpfMod(){const k=WPF.mod,S=SVC[k]||{ic:'📄',n:TITLES[k]||k,c:'#F97316
    <button class="wpf-modgo" onclick="showView('${k}')" title="${_t('เปิดเต็มจอในหลังบ้าน','Open in back office')}">🗂</button></div>
    <div class="wpf-modbody">${h}</div>`}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&typeof WPF!=='undefined'&&WPF.mod&&CUR==='front'&&!document.querySelector('.modal-bg.show,.modal.open,.bcs-modal:not([hidden])')){wpfModClose()}});
+
+/* ───────── KPI tiles ตามขอบเขตที่เลือก (แคมปัส › อาคารหลัก › อาคารย่อย › ชั้น) + สรุปแยกรายอาคาร ───────── */
+function wpScope(){const all=bcsFloors();
+  if(BCS.sel&&bcsFloorById(BCS.sel)){const f=bcsFloorById(BCS.sel);return{lv:'fl',name:(f.blk||'')+' · '+_t('ชั้น ','Fl ')+wpFlLabel(f.id),fl:[f]}}
+  if(WPV.blk){const G=wpGrpOf(WPV.blk);return{lv:'blk',name:(G&&G.blocks.length>1?G.name+' › ':'')+WPV.blk,fl:all.filter(f=>f.blk===WPV.blk)}}
+  if(WPV.grp){const G=WP_GROUPS.find(x=>x.id===WPV.grp);return{lv:'grp',name:G?G.name:WPV.grp,fl:all.filter(f=>G&&G.blocks.includes(f.blk))}}
+  return{lv:'all',name:_t('ทั้งแคมปัส','Whole campus'),fl:all}}
+function wpScopeStat(fl){const st=BCS.st||{},ids=new Set(fl.map(f=>f.id)),items=fl.flatMap(f=>(st[f.id]||{items:[]}).items);
+  const bad=items.filter(x=>x.rs.bad).length,crit=items.filter(x=>x.rs.crit).length,warn=bad-crit;
+  const cf=fl.filter(f=>st[f.id]&&st[f.id].crit).length,af=fl.filter(f=>st[f.id]&&st[f.id].bad).length;
+  const nm=new Set(items.map(x=>x.a.name)),wr=D.tickets.filter(t=>bcsOpenWR(t)&&svcOn(t.service)&&nm.has(t.area)),br=wr.filter(t=>slaOf(t).s==='breach').length;
+  return{n:items.length,ok:items.length?Math.round((items.length-bad)/items.length*100):100,bad,crit,warn,cf,af,fl:fl.length,wr:wr.length,br}}
+function wpScopeKids(sc){const all=bcsFloors();
+  if(sc.lv==='all')return WP_GROUPS.map(G=>({k:G.id,lab:G.name.replace('Campus ','').replace('Carpark ',''),fl:all.filter(f=>G.blocks.includes(f.blk)),go:`wpGrpSet('${G.id}')`}));
+  if(sc.lv==='grp'){const G=WP_GROUPS.find(x=>x.id===WPV.grp);if(G&&G.blocks.length>1)return G.blocks.map(b=>({k:b,lab:b,fl:all.filter(f=>f.blk===b),go:`wpBlkSet('${b}')`}))}
+  const blk=sc.lv==='fl'?bcsFloorById(BCS.sel).blk:WPV.blk||(WP_GROUPS.find(x=>x.id===WPV.grp)||{blocks:[]}).blocks[0];
+  return all.filter(f=>f.blk===blk).sort((a,c)=>wpLv(c.id)-wpLv(a.id)).map(f=>({k:f.id,lab:wpFlLabel(f.id),fl:[f],go:`bcsSelect('${f.id}')`,on:BCS.sel===f.id}))}
+bcsKpis=function(){const el=document.getElementById('bcs-kpis');if(!el)return;const sc=wpScope(),S=wpScopeStat(sc.fl),kids=wpScopeKids(sc).map(x=>Object.assign(x,{S:wpScopeStat(x.fl)}));
+  const br=(fn,col)=>sc.lv!=='all'?'':`<div class="wpk-br">${kids.map(x=>{const v=fn(x.S);return`<span class="${x.on?'on':''} ${v&&v!=='100%'?'hot':''}" style="${v&&v!=='100%'?'--bc:'+col(x.S):''}" onclick="event.stopPropagation();${x.go}" title="${esc(x.lab)}">${esc(x.lab)} <b>${v}</b></span>`}).join('')}</div>`;
+  const k=(l,v,s,c,b)=>`<div class="bcs-kpi wpk" style="--kc:${c}"><span>${l}</span><b>${v}</b><small>${s}</small>${b||''}</div>`;
+  const tag=`<em class="wpk-sc">${sc.lv==='all'?'🏙':sc.lv==='fl'?'▤':'🏢'} ${esc(sc.name)}</em>`;
+  el.innerHTML=
+   k(_t('พื้นที่ปกติ','Areas normal')+tag,S.ok+'%',(S.n-S.bad)+'/'+S.n+_t(' พื้นที่',' areas'),S.ok>=90?'#22C55E':S.ok>=70?'#EAB308':'#EF4444',br(x=>x.ok+'%',x=>x.ok>=90?'#22C55E':x.ok>=70?'#EAB308':'#EF4444'))+
+   k(_t('พื้นที่วิกฤต','Critical areas'),S.crit,_t('ใน ','in ')+S.cf+_t(' ชั้น',' floors')+' · '+_t('แจ้งเตือนรวม ','alerts ')+S.bad,'#EF4444',br(x=>x.crit||0,()=>'#EF4444'))+
+   k(_t('พื้นที่มีกิจกรรม (เตือน)','Areas with activity'),S.warn,_t('ชั้นที่มีเรื่อง ','floors affected ')+S.af+'/'+S.fl,'#A855F7',br(x=>x.warn||0,x=>'#A855F7'))+
+   k('Open WR',S.wr,S.br?`<b style="color:#EF4444">${S.br} ${_t('เกิน SLA','SLA breach')}</b>`:_t('ไม่มีงานเกิน SLA','no SLA breach'),'#3B82F6',br(x=>x.wr||0,()=>'#3B82F6'))};
+
+{const _sl=bcsSelect;bcsSelect=function(){const r=_sl.apply(this,arguments);try{bcsKpis()}catch(e){}return r}}
 
 // boot
 applyTheme();authBoot();load();buildChrome();renderUser();if(!me())showLogin();
