@@ -796,6 +796,11 @@ body.wpf-on #main{margin-left:0!important}body.wpf-on #content{padding:0!importa
 .bcs-kpi .wpk-br span,.bcs-kpi .wpk-br span b{font-size:10.5px!important;line-height:1.55!important;font-family:inherit!important;margin:0!important;display:inline!important;letter-spacing:0!important}
 .bcs-kpi .wpk-br span{display:inline-block!important;padding:0 6px!important;font-weight:600}
 .bcs-kpi .wpk-br span b{color:inherit!important}
+
+@keyframes wpkBlink{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(239,68,68,.55)}50%{opacity:.35;box-shadow:0 0 0 3px rgba(239,68,68,.25)}}
+.bcs-kpi .wpk-br span.wpk-blink{animation:wpkBlink 2.4s ease-in-out infinite;background:rgba(239,68,68,.12);font-weight:800}
+.bcs-kpi .wpk-br span b{margin:0 1px!important}
+.bcs-kpi .wpk-br span{text-transform:none!important}
 </style>
 </head>
 <body>
@@ -4143,10 +4148,10 @@ function wpScopeKids(sc){const all=bcsFloors();
   if(sc.lv==='all')return WP_GROUPS.map(G=>({k:G.id,lab:G.name.replace('Campus ','').replace('Carpark ',''),fl:all.filter(f=>G.blocks.includes(f.blk)),go:`wpGrpSet('${G.id}')`}));
   if(sc.lv==='grp'){const G=WP_GROUPS.find(x=>x.id===WPV.grp);if(G&&G.blocks.length>1)return G.blocks.map(b=>({k:b,lab:b,fl:all.filter(f=>f.blk===b),go:`wpBlkSet('${b}')`}))}
   const blk=sc.lv==='fl'?bcsFloorById(BCS.sel).blk:WPV.blk||(WP_GROUPS.find(x=>x.id===WPV.grp)||{blocks:[]}).blocks[0];
-  return all.filter(f=>f.blk===blk).sort((a,c)=>wpLv(c.id)-wpLv(a.id)).map(f=>({k:f.id,lab:wpFlLabel(f.id),fl:[f],go:`bcsSelect('${f.id}')`,on:BCS.sel===f.id}))}
+  return all.filter(f=>f.blk===blk).sort((a,c)=>wpLv(c.id)-wpLv(a.id)).map(f=>({k:f.id,lab:wpFlTag(f.id),fl:[f],go:`bcsSelect('${f.id}')`,on:BCS.sel===f.id}))}
 bcsKpis=function(){const el=document.getElementById('bcs-kpis');if(!el)return;const sc=wpScope(),S=wpScopeStat(sc.fl),kids=wpScopeKids(sc).map(x=>Object.assign(x,{S:wpScopeStat(x.fl)}));
   const G1=WPV.blk&&wpGrpOf(WPV.blk),showBr=sc.lv==='all'||(sc.lv==='grp'&&kids.length>1)||((sc.lv==='blk'||sc.lv==='grp')&&G1&&G1.blocks.length===1);
-  const br=(fn,col)=>!showBr?'':`<div class="wpk-br">${kids.map(x=>{const v=fn(x.S);return`<span class="${x.on?'on':''} ${v&&v!=='100%'?'hot':''}" style="${v&&v!=='100%'?'--bc:'+col(x.S):''}" onclick="event.stopPropagation();${x.go}" title="${esc(x.lab)}">${esc(x.lab)} <b>${v}</b></span>`}).join('')}</div>`;
+  const br=(fn,col)=>!showBr?'':`<div class="wpk-br">${kids.map(x=>{const v=fn(x.S);return`<span class="${x.on?'on':''} ${v&&v!=='100%'?'hot':''} ${v&&v!=='100%'&&col(x.S)==='#EF4444'?'wpk-blink':''}" style="${v&&v!=='100%'?'--bc:'+col(x.S):''}" onclick="event.stopPropagation();${x.go}" title="${esc(x.lab)}">${esc(x.lab)}(<b>${v}</b>)</span>`}).join('')}</div>`;
   const k=(l,v,s,c,b)=>`<div class="bcs-kpi wpk" style="--kc:${c}"><span>${l}</span><b>${v}</b><small>${s}</small>${b||''}</div>`;
   const tag=`<em class="wpk-sc">${sc.lv==='all'?'🏙':sc.lv==='fl'?'▤':'🏢'} ${esc(sc.name)}</em>`;
   el.innerHTML=
@@ -4156,6 +4161,8 @@ bcsKpis=function(){const el=document.getElementById('bcs-kpis');if(!el)return;co
    k('Open WR',S.wr,S.br?`<span style="color:#EF4444;font-weight:800">⚠ ${S.br} ${_t('เกิน SLA','SLA breach')}</span>`:_t('ไม่มีงานเกิน SLA','no SLA breach'),'#3B82F6',br(x=>x.wr||0,()=>'#3B82F6'))};
 
 {const _sl=bcsSelect;bcsSelect=function(){const r=_sl.apply(this,arguments);try{bcsKpis()}catch(e){}return r}}
+
+function wpFlTag(fid){const l=String(wpFlLabel(fid));return l==='S'||/^R(oof)?$/i.test(l)?'F-Roof':'F'+l}
 
 // boot
 applyTheme();authBoot();load();buildChrome();renderUser();if(!me())showLogin();
