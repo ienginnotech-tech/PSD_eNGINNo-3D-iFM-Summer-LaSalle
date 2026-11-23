@@ -4145,7 +4145,7 @@ function wpScopeKids(sc){const all=bcsFloors();
   const blk=sc.lv==='fl'?bcsFloorById(BCS.sel).blk:WPV.blk||(WP_GROUPS.find(x=>x.id===WPV.grp)||{blocks:[]}).blocks[0];
   return all.filter(f=>f.blk===blk).sort((a,c)=>wpLv(c.id)-wpLv(a.id)).map(f=>({k:f.id,lab:wpFlLabel(f.id),fl:[f],go:`bcsSelect('${f.id}')`,on:BCS.sel===f.id}))}
 bcsKpis=function(){const el=document.getElementById('bcs-kpis');if(!el)return;const sc=wpScope(),S=wpScopeStat(sc.fl),kids=wpScopeKids(sc).map(x=>Object.assign(x,{S:wpScopeStat(x.fl)}));
-  const showBr=sc.lv==='all'||(sc.lv==='grp'&&kids.length>1&&!bcsFloorById(kids[0].k));
+  const G1=WPV.blk&&wpGrpOf(WPV.blk),showBr=sc.lv==='all'||(sc.lv==='grp'&&kids.length>1)||((sc.lv==='blk'||sc.lv==='grp')&&G1&&G1.blocks.length===1);
   const br=(fn,col)=>!showBr?'':`<div class="wpk-br">${kids.map(x=>{const v=fn(x.S);return`<span class="${x.on?'on':''} ${v&&v!=='100%'?'hot':''}" style="${v&&v!=='100%'?'--bc:'+col(x.S):''}" onclick="event.stopPropagation();${x.go}" title="${esc(x.lab)}">${esc(x.lab)} <b>${v}</b></span>`}).join('')}</div>`;
   const k=(l,v,s,c,b)=>`<div class="bcs-kpi wpk" style="--kc:${c}"><span>${l}</span><b>${v}</b><small>${s}</small>${b||''}</div>`;
   const tag=`<em class="wpk-sc">${sc.lv==='all'?'🏙':sc.lv==='fl'?'▤':'🏢'} ${esc(sc.name)}</em>`;
@@ -4153,7 +4153,7 @@ bcsKpis=function(){const el=document.getElementById('bcs-kpis');if(!el)return;co
    k(_t('พื้นที่ปกติ','Areas normal')+tag,S.ok+'%',(S.n-S.bad)+'/'+S.n+_t(' พื้นที่',' areas'),S.ok>=90?'#22C55E':S.ok>=70?'#EAB308':'#EF4444',br(x=>x.ok+'%',x=>x.col))+
    k(_t('พื้นที่วิกฤต','Critical areas'),S.crit,_t('ใน ','in ')+S.cf+_t(' ชั้น',' floors')+' · '+_t('แจ้งเตือนรวม ','alerts ')+S.bad,'#EF4444',br(x=>x.crit||0,()=>'#EF4444'))+
    k(_t('พื้นที่มีกิจกรรม (เตือน)','Areas with activity'),S.warn,_t('ชั้นที่มีเรื่อง ','floors affected ')+S.af+'/'+S.fl,'#A855F7',br(x=>x.warn||0,x=>wpActCol(x.cnt)))+
-   k('Open WR',S.wr,S.br?`<b style="color:#EF4444">${S.br} ${_t('เกิน SLA','SLA breach')}</b>`:_t('ไม่มีงานเกิน SLA','no SLA breach'),'#3B82F6',br(x=>x.wr||0,()=>'#3B82F6'))};
+   k('Open WR',S.wr,S.br?`<span style="color:#EF4444;font-weight:800">⚠ ${S.br} ${_t('เกิน SLA','SLA breach')}</span>`:_t('ไม่มีงานเกิน SLA','no SLA breach'),'#3B82F6',br(x=>x.wr||0,()=>'#3B82F6'))};
 
 {const _sl=bcsSelect;bcsSelect=function(){const r=_sl.apply(this,arguments);try{bcsKpis()}catch(e){}return r}}
 
